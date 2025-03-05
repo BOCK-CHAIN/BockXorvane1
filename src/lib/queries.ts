@@ -3,17 +3,7 @@
 import { clerkClient, currentUser } from "@clerk/nextjs";
 import { db } from "./db";
 import { redirect } from "next/navigation";
-import {
-  Agency,
-  Lane,
-  Plan,
-  Prisma,
-  Role,
-  SubAccount,
-  Tag,
-  Ticket,
-  User,
-} from "@prisma/client";
+import { error } from "console";
 import { v4 } from "uuid";
 import {
   CreateFunnelFormSchema,
@@ -22,37 +12,34 @@ import {
 } from "./types";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { Invitation } from "@clerk/nextjs/server";
+import { Agency, Lane, Plan, Prisma, Role, SubAccount, Tag, Ticket, User } from "../../prisma/generated/webbuild";
 
 export const getAuthUserDetails = async () => {
   const user = await currentUser();
   if (!user) {
     return;
   }
-  try {
-    const userData = await db.user.findUnique({
-      where: {
-        email: user.emailAddresses[0].emailAddress,
-      },
-      include: {
-        Agency: {
-          include: {
-            SidebarOption: true,
-            SubAccount: {
-              include: {
-                SidebarOption: true,
-              },
+
+  const userData = await db.user.findUnique({
+    where: {
+      email: user.emailAddresses[0].emailAddress,
+    },
+    include: {
+      Agency: {
+        include: {
+          SidebarOption: true,
+          SubAccount: {
+            include: {
+              SidebarOption: true,
             },
           },
         },
-        Permissions: true,
       },
-    });
+      Permissions: true,
+    },
+  });
 
-    return userData;
-  } catch (err) {
-    console.log(err);
-  }
+  return userData;
 };
 
 export const saveActivityLogsNotification = async ({
@@ -66,170 +53,145 @@ export const saveActivityLogsNotification = async ({
 }) => {
   const authUser = await currentUser();
   let userData;
-  try {
-    if (!authUser) {
-      const response = await db.user.findFirst({
-        where: {
-          Agency: {
-            SubAccount: {
-              some: { id: subaccountId },
-            },
-          },
-        },
-      });
-      if (response) {
-        userData = response;
-      }
-    } else {
-      userData = await db.user.findUnique({
-        where: { email: authUser?.emailAddresses[0].emailAddress },
-      });
-    }
-
-    if (!userData) {
-      console.log("Could not find a user");
-      return;
-    }
-
-    let foundAgencyId = agencyId;
-    if (!foundAgencyId) {
-      if (!subaccountId) {
-        throw new Error(
-          "You need to provide atleast an agency Id or subaccount Id"
-        );
-      }
-      const response = await db.subAccount.findUnique({
-        where: { id: subaccountId },
-      });
-      if (response) foundAgencyId = response.agencyId;
-    }
-    if (subaccountId) {
-      await db.notification.create({
-        data: {
-          notification: `${userData.name} | ${description}`,
-          User: {
-            connect: {
-              id: userData.id,
-            },
-          },
-          Agency: {
-            connect: {
-              id: foundAgencyId,
-            },
-          },
+  if (!authUser) {
+    const response = await db.user.findFirst({
+      where: {
+        Agency: {
           SubAccount: {
-            connect: { id: subaccountId },
-          },
-        },
-      });
-    } else {
-      await db.notification.create({
-        data: {
-          notification: `${userData.name} | ${description}`,
-          User: {
-            connect: {
-              id: userData.id,
-            },
-          },
-          Agency: {
-            connect: {
-              id: foundAgencyId,
+            some: {
+              id: subaccountId,
             },
           },
         },
-      });
+      },
+    });
+    if (response) {
+      userData = response;
     }
-  } catch (err) {
-    console.log(err);
+  } else {
+    userData = await db.user.findUnique({
+      where: {
+        email: authUser?.emailAddresses[0].emailAddress,
+      },
+    });
+  }
+
+  if (!userData) {
+    console.log("Could not find a user");
+    return;
+  }
+
+  let foundAgencyId = agencyId;
+  if (!foundAgencyId) {
+    if (!subaccountId) {
+      throw new Error(
+        "You need to provide at least an agency Id or subaccount Id"
+      );
+    }
+    const response = await db.subAccount.findUnique({
+      where: { id: subaccountId },
+    });
+
+    if (response) foundAgencyId = response.agencyId;
+  }
+
+  if (subaccountId) {
+    await db.notification.create({
+      data: {
+        notification: `${userData.name} | ${description}`,
+        User: {
+          connect: {
+            id: userData.id,
+          },
+        },
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+        SubAccount: {
+          connect: {
+            id: subaccountId,
+          },
+        },
+      },
+    });
+  } else {
+    await db.notification.create({
+      data: {
+        notification: `${userData.name} | ${description}`,
+        User: {
+          connect: {
+            id: userData.id,
+          },
+        },
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+      },
+    });
   }
 };
 
-export const createTeamUser = async (agencyId: string, user: Partial<User>) => {
+export const createTeamUser = async (agencyId: string, user: User) => {
   if (user.role === "AGENCY_OWNER") return null;
-  try {
-    console.log(user);
-    const response = await db.user.create({
-      data: {
-        name: user.name as string,
-        email: user.email as string,
-        avatarUrl: user.avatarUrl as string,
-        role: user.role,
-        agencyId: agencyId,
-      },
-    });
-    return response;
-  } catch (err) {
-    console.log(err);
-    return null;
-  }
+  const response = await db.user.create({ data: { ...user } });
+  return response;
 };
 
 export const verifyAndAcceptInvitation = async () => {
   const user = await currentUser();
-  if (!user)
-    return redirect(
-      new URL("/sign-in", process.env.NEXT_PUBLIC_URL).toString()
-    );
-  try {
-    const invitationExists = await db.invitation.findUnique({
-      where: {
-        email: user.emailAddresses[0].emailAddress,
-        status: "PENDING",
-      },
+  if (!user) return redirect("/sign-in");
+
+  const invitationExists = await db.invitation.findUnique({
+    where: {
+      email: user.emailAddresses[0].emailAddress,
+      status: "PENDING",
+    },
+  });
+
+  if (invitationExists) {
+    const userDetails = await createTeamUser(invitationExists.agencyId, {
+      email: invitationExists.email,
+      agencyId: invitationExists.agencyId,
+      avatarUrl: user.imageUrl,
+      id: user.id,
+      name: `${user.firstName} ${user.lastName}`,
+      role: invitationExists.role,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
-    if (invitationExists) {
-      const userDetails = await createTeamUser(invitationExists.agencyId, {
-        email: invitationExists.email as string,
-        agencyId: invitationExists.agencyId as string,
-        avatarUrl: user.imageUrl as string,
-        name: `${user.firstName} ${user.lastName}` as string,
-        role: invitationExists.role,
-      });
-
-      await saveActivityLogsNotification({
-        agencyId: invitationExists?.agencyId,
-        description: `Joined`,
-        subaccountId: undefined,
-      });
-
-      if (userDetails) {
-        await clerkClient.users.updateUserMetadata(user.id, {
-          privateMetadata: {
-            role: userDetails.role || "SUBACCOUNT_USER",
-          },
-        });
-        const invitations = await clerkClient.invitations.getInvitationList();
-        const inviteduser = invitations.find(
-          (invitation: Invitation) =>
-            invitation.emailAddress === userDetails.email
-        );
-        if (inviteduser) {
-          if (!invitations || invitations.length === 0) {
-            console.log("No invitation found for this email.");
-            return;
-          } else {
-            clerkClient.invitations.revokeInvitation(inviteduser.id);
-          }
-        } else {
-          console.log("No invitation found for this email.");
-        }
-
-        await db.invitation.delete({
-          where: { email: userDetails.email },
-        });
-
-        return userDetails.agencyId;
-      } else return null;
-    } else {
-      const agency = await db.user.findUnique({
-        where: {
-          email: user.emailAddresses[0].emailAddress,
+    await saveActivityLogsNotification({
+      agencyId: invitationExists?.agencyId,
+      description: "Joined",
+      subaccountId: undefined,
+    });
+    if (userDetails) {
+      await clerkClient.users.updateUserMetadata(user.id, {
+        privateMetadata: {
+          role: userDetails.role || "SUBACCOUNT_USER",
         },
       });
-      return agency ? agency.agencyId : null;
+
+      await db.invitation.delete({
+        where: {
+          email: userDetails.email,
+        },
+      });
+
+      return userDetails.agencyId;
+    } else {
+      return null;
     }
-  } catch (err) {
-    console.log(err);
+  } else {
+    const agency = await db.user.findUnique({
+      where: {
+        email: user.emailAddresses[0].emailAddress,
+      },
+    });
+    return agency ? agency.agencyId : null;
   }
 };
 
@@ -241,18 +203,20 @@ export const updateAgencyDetails = async (
     where: { id: agencyId },
     data: { ...agencyDetails },
   });
+
   return response;
 };
 
 export const deleteAgency = async (agencyId: string) => {
-  const response = await db.agency.delete({ where: { id: agencyId } });
+  const response = await db.agency.delete({
+    where: { id: agencyId },
+  });
   return response;
 };
 
 export const initUser = async (newUser: Partial<User>) => {
   const user = await currentUser();
   if (!user) return;
-
   const userData = await db.user.upsert({
     where: {
       email: user.emailAddresses[0].emailAddress,
@@ -286,7 +250,9 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
       update: agency,
       create: {
         users: {
-          connect: { email: agency.companyEmail },
+          connect: {
+            email: agency.companyEmail,
+          },
         },
         ...agency,
         SidebarOption: {
@@ -295,6 +261,16 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
               name: "Dashboard",
               icon: "category",
               link: `/agency/${agency.id}`,
+            },
+            {
+              name: "Sub Accounts",
+              icon: "person",
+              link: `/agency/${agency.id}/all-subaccounts`,
+            },
+            {
+              name: "Team",
+              icon: "shield",
+              link: `/agency/${agency.id}/team`,
             },
             {
               name: "Launchpad",
@@ -311,16 +287,6 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
               icon: "settings",
               link: `/agency/${agency.id}/settings`,
             },
-            {
-              name: "Sub Accounts",
-              icon: "person",
-              link: `/agency/${agency.id}/all-subaccounts`,
-            },
-            {
-              name: "Team",
-              icon: "shield",
-              link: `/agency/${agency.id}/team`,
-            },
           ],
         },
       },
@@ -334,8 +300,12 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
 export const getNotificationAndUser = async (agencyId: string) => {
   try {
     const response = await db.notification.findMany({
-      where: { agencyId },
-      include: { User: true },
+      where: {
+        agencyId,
+      },
+      include: {
+        User: true,
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -359,7 +329,9 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
   if (!agencyOwner) return console.log("🔴Erorr could not create subaccount");
   const permissionId = v4();
   const response = await db.subAccount.upsert({
-    where: { id: subAccount.id },
+    where: {
+      id: subAccount.id,
+    },
     update: subAccount,
     create: {
       ...subAccount,
@@ -380,24 +352,9 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
       SidebarOption: {
         create: [
           {
-            name: "Launchpad",
-            icon: "clipboardIcon",
-            link: `/subaccount/${subAccount.id}/launchpad`,
-          },
-          {
-            name: "Settings",
-            icon: "settings",
-            link: `/subaccount/${subAccount.id}/settings`,
-          },
-          {
-            name: "Funnels",
-            icon: "pipelines",
-            link: `/subaccount/${subAccount.id}/funnels`,
-          },
-          {
-            name: "Media",
-            icon: "database",
-            link: `/subaccount/${subAccount.id}/media`,
+            name: "Dashboard",
+            icon: "category",
+            link: `/subaccount/${subAccount.id}`,
           },
           {
             name: "Pipelines",
@@ -405,26 +362,56 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
             link: `/subaccount/${subAccount.id}/pipelines`,
           },
           {
+            name: "Funnels",
+            icon: "pipelines",
+            link: `/subaccount/${subAccount.id}/funnels`,
+          },
+          {
+            name: "Launchpad",
+            icon: "clipboardIcon",
+            link: `/subaccount/${subAccount.id}/launchpad`,
+          },
+          {
+            name: "Media",
+            icon: "database",
+            link: `/subaccount/${subAccount.id}/media`,
+          },
+
+          {
             name: "Contacts",
             icon: "person",
             link: `/subaccount/${subAccount.id}/contacts`,
           },
           {
-            name: "Dashboard",
-            icon: "category",
-            link: `/subaccount/${subAccount.id}`,
+            name: "Settings",
+            icon: "settings",
+            link: `/subaccount/${subAccount.id}/settings`,
+          },
+          {
+            name: "Automations",
+            icon: "chip",
+            link: `/subaccount/${subAccount.id}/automations`,
           },
         ],
       },
     },
   });
+
   return response;
 };
 
 export const getUserPermissions = async (userId: string) => {
   const response = await db.user.findUnique({
-    where: { id: userId },
-    select: { Permissions: { include: { SubAccount: true } } },
+    where: {
+      id: userId,
+    },
+    select: {
+      Permissions: {
+        include: {
+          SubAccount: true,
+        },
+      },
+    },
   });
 
   return response;
@@ -453,8 +440,12 @@ export const changeUserPermissions = async (
 ) => {
   try {
     const response = await db.permissions.upsert({
-      where: { id: permissionId },
-      update: { access: permission },
+      where: {
+        id: permissionId,
+      },
+      update: {
+        access: permission,
+      },
       create: {
         access: permission,
         email: userEmail,
@@ -511,10 +502,11 @@ export const sendInvitation = async (
   email: string,
   agencyId: string
 ) => {
+  const response = await db.invitation.create({
+    data: { email, agencyId, role },
+  });
+
   try {
-    const resposne = await db.invitation.create({
-      data: { email, agencyId, role },
-    });
     const invitation = await clerkClient.invitations.createInvitation({
       emailAddress: email,
       redirectUrl: process.env.NEXT_PUBLIC_URL,
@@ -523,10 +515,12 @@ export const sendInvitation = async (
         role,
       },
     });
-    return resposne;
   } catch (error) {
-    throw new Error("Invitation already exists");
+    console.log(error);
+    throw error;
   }
+
+  return response;
 };
 
 export const getMedia = async (subaccountId: string) => {
@@ -534,23 +528,25 @@ export const getMedia = async (subaccountId: string) => {
     where: {
       id: subaccountId,
     },
-    include: { Media: true },
+    include: {
+      Media: true,
+    },
   });
+
   return mediafiles;
 };
 
 export const createMedia = async (
   subaccountId: string,
-  mediaFile: CreateMediaType
+  mediaFiles: CreateMediaType
 ) => {
   const response = await db.media.create({
     data: {
-      link: mediaFile.link,
-      name: mediaFile.name,
+      link: mediaFiles.link,
+      name: mediaFiles.name,
       subAccountId: subaccountId,
     },
   });
-
   return response;
 };
 
@@ -577,7 +573,9 @@ export const getLanesWithTicketAndTags = async (pipelineId: string) => {
     where: {
       pipelineId,
     },
-    orderBy: { order: "asc" },
+    orderBy: {
+      order: "asc",
+    },
     include: {
       Tickets: {
         orderBy: {
@@ -626,7 +624,9 @@ export const upsertPipeline = async (
 
 export const deletePipeline = async (pipelineId: string) => {
   const response = await db.pipeline.delete({
-    where: { id: pipelineId },
+    where: {
+      id: pipelineId,
+    },
   });
   return response;
 };
@@ -697,8 +697,12 @@ export const upsertLane = async (lane: Prisma.LaneUncheckedCreateInput) => {
 };
 
 export const deleteLane = async (laneId: string) => {
-  const resposne = await db.lane.delete({ where: { id: laneId } });
-  return resposne;
+  const response = await db.lane.delete({
+    where: {
+      id: laneId,
+    },
+  });
+  return response;
 };
 
 export const getTicketsWithTags = async (pipelineId: string) => {
@@ -708,14 +712,20 @@ export const getTicketsWithTags = async (pipelineId: string) => {
         pipelineId,
       },
     },
-    include: { Tags: true, Assigned: true, Customer: true },
+    include: {
+      Tags: true,
+      Assigned: true,
+      Customer: true,
+    },
   });
   return response;
 };
 
 export const _getTicketsWithAllRelations = async (laneId: string) => {
   const response = await db.ticket.findMany({
-    where: { laneId: laneId },
+    where: {
+      laneId: laneId,
+    },
     include: {
       Assigned: true,
       Customer: true,
@@ -727,7 +737,7 @@ export const _getTicketsWithAllRelations = async (laneId: string) => {
 };
 
 export const getSubAccountTeamMembers = async (subaccountId: string) => {
-  const subaccountUsersWithAccess = await db.user.findMany({
+  const subaccountUserWithAccess = await db.user.findMany({
     where: {
       Agency: {
         SubAccount: {
@@ -745,7 +755,7 @@ export const getSubAccountTeamMembers = async (subaccountId: string) => {
       },
     },
   });
-  return subaccountUsersWithAccess;
+  return subaccountUserWithAccess;
 };
 
 export const searchContacts = async (searchTerms: string) => {
@@ -766,7 +776,9 @@ export const upsertTicket = async (
   let order: number;
   if (!ticket.order) {
     const tickets = await db.ticket.findMany({
-      where: { laneId: ticket.laneId },
+      where: {
+        laneId: ticket.laneId,
+      },
     });
     order = tickets.length;
   } else {
@@ -796,7 +808,6 @@ export const deleteTicket = async (ticketId: string) => {
       id: ticketId,
     },
   });
-
   return response;
 };
 
@@ -807,7 +818,10 @@ export const upsertTag = async (
   const response = await db.tag.upsert({
     where: { id: tag.id || v4(), subAccountId: subaccountId },
     update: tag,
-    create: { ...tag, subAccountId: subaccountId },
+    create: {
+      ...tag,
+      subAccountId: subaccountId,
+    },
   });
 
   return response;
@@ -815,14 +829,22 @@ export const upsertTag = async (
 
 export const getTagsForSubaccount = async (subaccountId: string) => {
   const response = await db.subAccount.findUnique({
-    where: { id: subaccountId },
-    select: { Tags: true },
+    where: {
+      id: subaccountId,
+    },
+    select: {
+      Tags: true,
+    },
   });
   return response;
 };
 
 export const deleteTag = async (tagId: string) => {
-  const response = await db.tag.delete({ where: { id: tagId } });
+  const response = await db.tag.delete({
+    where: {
+      id: tagId,
+    },
+  });
   return response;
 };
 
@@ -834,6 +856,7 @@ export const upsertContact = async (
     update: contact,
     create: contact,
   });
+
   return response;
 };
 
@@ -848,7 +871,9 @@ export const getFunnels = async (subacountId: string) => {
 
 export const getFunnel = async (funnelId: string) => {
   const funnel = await db.funnel.findUnique({
-    where: { id: funnelId },
+    where: {
+      id: funnelId,
+    },
     include: {
       FunnelPages: {
         orderBy: {
@@ -857,7 +882,6 @@ export const getFunnel = async (funnelId: string) => {
       },
     },
   });
-
   return funnel;
 };
 
@@ -866,8 +890,12 @@ export const updateFunnelProducts = async (
   funnelId: string
 ) => {
   const data = await db.funnel.update({
-    where: { id: funnelId },
-    data: { liveProducts: products },
+    where: {
+      id: funnelId,
+    },
+    data: {
+      liveProducts: products,
+    },
   });
   return data;
 };
@@ -902,8 +930,12 @@ export const upsertFunnelPage = async (
   return response;
 };
 
-export const deleteFunnelePage = async (funnelPageId: string) => {
-  const response = await db.funnelPage.delete({ where: { id: funnelPageId } });
+export const deleteFunnelPage = async (funnelPageId: string) => {
+  const response = await db.funnelPage.delete({
+    where: {
+      id: funnelPageId,
+    },
+  });
 
   return response;
 };
@@ -923,8 +955,11 @@ export const getDomainContent = async (subDomainName: string) => {
     where: {
       subDomainName,
     },
-    include: { FunnelPages: true },
+    include: {
+      FunnelPages: true,
+    },
   });
+
   return response;
 };
 

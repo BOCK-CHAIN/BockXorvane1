@@ -12,7 +12,6 @@ const Page = async ({
 }) => {
   const agencyId = await verifyAndAcceptInvitation()
   
-  
   //get the users details
   const user = await getAuthUserDetails()
   if (agencyId) {

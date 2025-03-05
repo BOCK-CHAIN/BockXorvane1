@@ -1,11 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/webbuild"
 }
 
 datasource db {
-  provider     = "postgresql"
-  url          = env("DATABASE_URL")
-  
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
@@ -17,10 +17,10 @@ model User {
   updatedAt    DateTime       @updatedAt
   role         Role           @default(SUBACCOUNT_USER)
   agencyId     String?
-  Agency       Agency?        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Notification Notification[]
   Permissions  Permissions[]
   Ticket       Ticket[]
-  Notification Notification[]
+  Agency       Agency?        @relation(fields: [agencyId], references: [id], onDelete: Cascade)
 
   @@index([agencyId])
 }
@@ -55,13 +55,13 @@ model Agency {
   goal                 Int                   @default(5)
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
-  users                User[]
-  SubAccount           SubAccount[]
+  AddOns               AddOns[]
   SidebarOption        AgencySidebarOption[]
   Invitation           Invitation[]
   Notification         Notification[]
+  SubAccount           SubAccount[]
   Subscription         Subscription?
-  AddOns               AddOns[]
+  users                User[]
 }
 
 model SubAccount {
@@ -81,17 +81,17 @@ model SubAccount {
   state                String
   country              String
   agencyId             String
-  Agency               Agency                    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
-  SidebarOption        SubAccountSidebarOption[]
-  Permissions          Permissions[]
+  Automation           Automation[]
+  Contact              Contact[]
   Funnels              Funnel[]
   Media                Media[]
-  Contact              Contact[]
-  Trigger              Trigger[]
-  Automation           Automation[]
-  Pipeline             Pipeline[]
-  Tags                 Tag[]
   Notification         Notification[]
+  Permissions          Permissions[]
+  Pipeline             Pipeline[]
+  Agency               Agency                    @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  SidebarOption        SubAccountSidebarOption[]
+  Tags                 Tag[]
+  Trigger              Trigger[]
 
   @@index([agencyId])
 }
@@ -104,7 +104,7 @@ model Tag {
   updatedAt    DateTime   @updatedAt
   subAccountId String
   SubAccount   SubAccount @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
-  Ticket       Ticket[]
+  Ticket       Ticket[]   @relation("TagToTicket")
 
   @@index([subAccountId])
 }
@@ -145,10 +145,10 @@ model Ticket {
   description    String?
   customerId     String?
   assignedUserId String?
+  Assigned       User?    @relation(fields: [assignedUserId], references: [id])
+  Customer       Contact? @relation(fields: [customerId], references: [id])
   Lane           Lane     @relation(fields: [laneId], references: [id], onDelete: Cascade)
-  Tags           Tag[]
-  Customer       Contact? @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  Assigned       User?    @relation(fields: [assignedUserId], references: [id], onDelete: SetNull)
+  Tags           Tag[]    @relation("TagToTicket")
 
   @@index([laneId])
   @@index([customerId])
@@ -162,8 +162,8 @@ model Trigger {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   subAccountId String
-  Subaccount   SubAccount   @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   Automations  Automation[]
+  Subaccount   SubAccount   @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
 
   @@index([subAccountId])
 }
@@ -176,9 +176,9 @@ model Automation {
   triggerId          String?
   published          Boolean              @default(false)
   subAccountId       String
-  Trigger            Trigger?             @relation(fields: [triggerId], references: [id], onDelete: Cascade)
-  Subaccount         SubAccount           @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   Action             Action[]
+  Subaccount         SubAccount           @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
+  Trigger            Trigger?             @relation(fields: [triggerId], references: [id], onDelete: Cascade)
   AutomationInstance AutomationInstance[]
 
   @@index([triggerId])
@@ -247,9 +247,9 @@ model Funnel {
   favicon       String?
   subAccountId  String
   liveProducts  String?      @default("[]")
+  ClassName     ClassName[]
   SubAccount    SubAccount   @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
   FunnelPages   FunnelPage[]
-  ClassName     ClassName[]
 
   @@index([subAccountId])
 }
@@ -291,7 +291,7 @@ model AgencySidebarOption {
   agencyId  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  Agency    Agency?  @relation(fields: [agencyId], references: [id], onDelete: Cascade)
+  Agency    Agency   @relation(fields: [agencyId], references: [id], onDelete: Cascade)
 
   @@index([agencyId])
 }
@@ -328,9 +328,9 @@ model Notification {
   userId       String
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
-  User         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   Agency       Agency      @relation(fields: [agencyId], references: [id], onDelete: Cascade)
   SubAccount   SubAccount? @relation(fields: [subAccountId], references: [id], onDelete: Cascade)
+  User         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([agencyId])
   @@index([subAccountId])
@@ -365,15 +365,6 @@ model AddOns {
   Agency    Agency?  @relation(fields: [agencyId], references: [id])
 
   @@index([agencyId])
-}
-
-model TagToTicket {
-  A String
-  B String
-
-  @@unique([A, B], map: "_TagToTicket_AB_unique")
-  @@index([B], map: "_TagToTicket_B_index")
-  @@map("_TagToTicket")
 }
 
 enum Role {
