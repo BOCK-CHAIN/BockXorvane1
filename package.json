@@ -1,26 +1,19 @@
 {
-  "name": "webprodigies-plura",
+  "name": "plura",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "prisma:generate": "npm run prisma:generate:main && npm run prisma:generate:webbuild",
-    "prisma:generate:main": "prisma generate --schema=prisma/main/schema.prisma",
-    "prisma:generate:webbuild": "prisma generate --schema=prisma/webbuild/schema.prisma",
-    "prisma:pull": "npm run prisma:pull:main && npm run prisma:pull:webbuild",
-    "prisma:pull:main": "prisma db pull --schema=prisma/main/schema.prisma",
-    "prisma:pull:webbuild": "prisma db pull --schema=prisma/webbuild/schema.prisma",
-    "studio:main": "prisma studio --schema=prisma/main/schema.prisma",
-    "studio:webbuild": "prisma studio --schema=prisma/webbuild/schema.prisma",
-    "prisma:migrate": "prisma migrate dev --schema=prisma/webbuild/schema.prisma"
+    "start": "next start"
+  },
+  "resolutions": {
+    "@auth/core": "latest"
   },
   "dependencies": {
-    "@clerk/nextjs": "^4.29.1",
-    "@clerk/themes": "^1.7.9",
-    "@hookform/resolvers": "^3.3.3",
-    "@prisma/client": "^6.4.1",
+    "@auth/prisma-adapter": "^2.8.0",
+    "@hookform/resolvers": "^3.10.0",
+    "@prisma/client": "^6.5.0",
     "@radix-ui/react-accordion": "^1.1.2",
     "@radix-ui/react-alert-dialog": "^1.0.5",
     "@radix-ui/react-aspect-ratio": "^1.0.3",
@@ -56,6 +49,7 @@
     "@types/react-native-razorpay": "^2.2.6",
     "@types/uuid": "^9.0.7",
     "@uploadthing/react": "^6.0.2",
+    "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "cmdk": "^0.2.0",
@@ -71,7 +65,7 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-day-picker": "^8.10.0",
     "react-dom": "^18",
-    "react-hook-form": "^7.49.2",
+    "react-hook-form": "^7.54.2",
     "react-native-razorpay": "^2.3.0",
     "react-razorpay": "^3.0.1",
     "react-resizable-panels": "^1.0.7",
@@ -94,7 +88,7 @@
     "eslint-config-next": "14.0.4",
     "nodemon": "^2.0.22",
     "postcss": "^8",
-    "prisma": "^6.4.1",
+    "prisma": "^6.5.0",
     "tailwindcss": "^3.3.0",
     "ts-node": "^10.9.1",
     "typescript": "^5"

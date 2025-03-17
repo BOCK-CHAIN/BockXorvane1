@@ -1,27 +1,25 @@
-// import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
-// const globalForPrisma = global as unknown as { prisma: PrismaClient };
+const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-// export const db =
-//   globalForPrisma.prisma ||
-//   new PrismaClient();
+export const db =
+  globalForPrisma.prisma ||
+  new PrismaClient();
 
-// if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
+if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = db;
 
-import { PrismaClient as Main } from "@/../prisma/generated/main";
-import { PrismaClient as WebBuild } from "@/../prisma/generated/webbuild";
+// import { PrismaClient as Main } from "@/../prisma/generated/main";
+// import { PrismaClient as WebBuild } from "@/../prisma/generated/webbuild";
 
-const main = new Main();
-const db = new WebBuild();
+// const globalForPrisma = globalThis as unknown as {
+//   main?: Main;
+//   db?: WebBuild;
+// };
 
-const globalForPrisma = global as unknown as {
-  main?: typeof main;
-  db?: typeof db;
-};
+// export const main = globalForPrisma.main ?? new Main();
+// export const db = globalForPrisma.db ?? new WebBuild();
 
-if (process.env.NODE_ENV !== "production") {
-  globalForPrisma.main = main;
-  globalForPrisma.db = db;
-}
-
-export { main, db };
+// if (process.env.NODE_ENV !== "production") {
+//   globalForPrisma.main = main;
+//   globalForPrisma.db = db;
+// }

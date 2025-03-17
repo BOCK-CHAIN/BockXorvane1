@@ -1,6 +1,5 @@
 'use client'
 import { NotificationWithUser } from '@/lib/types'
-import { UserButton } from '@clerk/nextjs'
 import React, { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import {
@@ -52,7 +51,7 @@ const InfoBar = ({ notifications, subAccountId, className, role }: Props) => {
         )}
       >
         <div className="flex items-center gap-2 ml-auto">
-          <UserButton afterSignOutUrl="/" />
+          {/* <UserButton afterSignOutUrl="/" /> */}
           <Sheet>
             <SheetTrigger>
               <div className="rounded-full w-9 h-9 bg-primary flex items-center justify-center text-white">

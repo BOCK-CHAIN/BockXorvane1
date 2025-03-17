@@ -1,6 +1,5 @@
 "use server";
 
-import { clerkClient, currentUser } from "@clerk/nextjs";
 import { db } from "./db";
 import { redirect } from "next/navigation";
 import { error } from "console";
@@ -12,17 +11,20 @@ import {
 } from "./types";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
-import { Agency, Lane, Plan, Prisma, Role, SubAccount, Tag, Ticket, User } from "../../prisma/generated/webbuild";
+import { Agency, Lane, Plan, Prisma, Role, SubAccount, Tag, Ticket, User } from "@prisma/client";
+import { auth } from "@/auth";
+import { getToken } from "next-auth/jwt";
 
 export const getAuthUserDetails = async () => {
-  const user = await currentUser();
-  if (!user) {
+  const session = await auth();
+  const user = session?.user
+  if (!user || !user.email) {
     return;
   }
 
   const userData = await db.user.findUnique({
     where: {
-      email: user.emailAddresses[0].emailAddress,
+      email: user.email
     },
     include: {
       Agency: {
@@ -51,7 +53,8 @@ export const saveActivityLogsNotification = async ({
   description: string;
   subaccountId?: string;
 }) => {
-  const authUser = await currentUser();
+  const session = await auth();
+  const authUser = session?.user;
   let userData;
   if (!authUser) {
     const response = await db.user.findFirst({
@@ -71,7 +74,7 @@ export const saveActivityLogsNotification = async ({
   } else {
     userData = await db.user.findUnique({
       where: {
-        email: authUser?.emailAddresses[0].emailAddress,
+        email: authUser?.email,
       },
     });
   }
@@ -142,12 +145,13 @@ export const createTeamUser = async (agencyId: string, user: User) => {
 };
 
 export const verifyAndAcceptInvitation = async () => {
-  const user = await currentUser();
-  if (!user) return redirect("/sign-in");
+  const session = await auth();
+  const user = session?.user;
+  if (!user || !user.email || !user.id) return redirect("/auth/sign-in");
 
   const invitationExists = await db.invitation.findUnique({
     where: {
-      email: user.emailAddresses[0].emailAddress,
+      email: user.email,
       status: "PENDING",
     },
   });
@@ -156,9 +160,9 @@ export const verifyAndAcceptInvitation = async () => {
     const userDetails = await createTeamUser(invitationExists.agencyId, {
       email: invitationExists.email,
       agencyId: invitationExists.agencyId,
-      avatarUrl: user.imageUrl,
+      avatarUrl: user.image || "",
       id: user.id,
-      name: `${user.firstName} ${user.lastName}`,
+      name: `${user.name}`,
       role: invitationExists.role,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -169,11 +173,11 @@ export const verifyAndAcceptInvitation = async () => {
       subaccountId: undefined,
     });
     if (userDetails) {
-      await clerkClient.users.updateUserMetadata(user.id, {
-        privateMetadata: {
-          role: userDetails.role || "SUBACCOUNT_USER",
-        },
-      });
+      // await clerkClient.users.updateUserMetadata(user.id, {
+      //   privateMetadata: {
+      //     role: userDetails.role || "SUBACCOUNT_USER",
+      //   },
+      // });send
 
       await db.invitation.delete({
         where: {
@@ -188,7 +192,7 @@ export const verifyAndAcceptInvitation = async () => {
   } else {
     const agency = await db.user.findUnique({
       where: {
-        email: user.emailAddresses[0].emailAddress,
+        email: user.email,
       },
     });
     return agency ? agency.agencyId : null;
@@ -215,27 +219,43 @@ export const deleteAgency = async (agencyId: string) => {
 };
 
 export const initUser = async (newUser: Partial<User>) => {
-  const user = await currentUser();
+  const session = await auth();
+  const user = session?.user;
   if (!user) return;
   const userData = await db.user.upsert({
     where: {
-      email: user.emailAddresses[0].emailAddress,
+      email: user.email,
     },
     update: newUser,
     create: {
       id: user.id,
-      avatarUrl: user.imageUrl,
-      email: user.emailAddresses[0].emailAddress,
-      name: `${user.firstName} ${user.lastName}`,
+      avatarUrl: user.image || "",
+      email: user.email,
+      name: `${user.name}`,
       role: newUser.role || "SUBACCOUNT_USER",
     },
   });
 
-  await clerkClient.users.updateUserMetadata(user.id, {
-    privateMetadata: {
-      role: newUser.role || "SUBACCOUNT_USER",
+  await db.authDetials.update({
+    where:{
+      email: user.email
     },
-  });
+    data:{
+      role: newUser.role || "SUBACCOUNT_USER"
+    }
+  })
+
+  const token = await getToken({ req: { headers: { cookie: "" } } });
+  console.log("token",token)
+  if (token) {
+    token.role = newUser.role || "SUBACCOUNT_USER";
+  }
+
+  // await clerkClient.users.updateUserMetadata(user.id, {
+  //   privateMetadata: {
+  //     role: newUser.role || "SUBACCOUNT_USER",
+  //   },
+  // });
 
   return userData;
 };
@@ -423,11 +443,11 @@ export const updateUser = async (user: Partial<User>) => {
     data: { ...user },
   });
 
-  await clerkClient.users.updateUserMetadata(response.id, {
-    privateMetadata: {
-      role: user.role || "SUBACCOUNT_USER",
-    },
-  });
+  // await clerkClient.users.updateUserMetadata(response.id, {
+  //   privateMetadata: {
+  //     role: user.role || "SUBACCOUNT_USER",
+  //   },
+  // });
 
   return response;
 };
@@ -477,11 +497,11 @@ export const deleteSubAccount = async (subaccountId: string) => {
 };
 
 export const deleteUser = async (userId: string) => {
-  await clerkClient.users.updateUserMetadata(userId, {
-    privateMetadata: {
-      role: undefined,
-    },
-  });
+  // await clerkClient.users.updateUserMetadata(userId, {
+  //   privateMetadata: {
+  //     role: undefined,
+  //   },
+  // });
   const deletedUser = await db.user.delete({ where: { id: userId } });
 
   return deletedUser;
@@ -506,19 +526,21 @@ export const sendInvitation = async (
     data: { email, agencyId, role },
   });
 
-  try {
-    const invitation = await clerkClient.invitations.createInvitation({
-      emailAddress: email,
-      redirectUrl: process.env.NEXT_PUBLIC_URL,
-      publicMetadata: {
-        throughInvitation: true,
-        role,
-      },
-    });
-  } catch (error) {
-    console.log(error);
-    throw error;
-  }
+  // TODO: send the email to the subaccount user.
+
+  // try {
+    // const invitation = await clerkClient.invitations.createInvitation({
+    //   emailAddress: email,
+    //   redirectUrl: process.env.NEXT_PUBLIC_URL,
+    //   publicMetadata: {
+    //     throughInvitation: true,
+    //     role,
+    //   },
+    // });
+  // } catch (error) {
+  //   console.log(error);
+  //   throw error;
+  // }
 
   return response;
 };

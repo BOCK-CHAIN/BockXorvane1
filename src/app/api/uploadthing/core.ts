@@ -1,14 +1,17 @@
 import { createUploadthing, type FileRouter } from 'uploadthing/next'
-import { auth } from '@clerk/nextjs'
+import { auth } from '@/auth'
 
 const f = createUploadthing()
 
-const authenticateUser = () => {
-  const user = auth()
+const authenticateUser = async() => {
+  const session = await auth()
+  const user = session?.user
+  
   // If you throw, the user will not be able to upload
   if (!user) throw new Error('Unauthorized')
-  // Whatever is returned here is accessible in onUploadComplete as `metadata`
-  return user
+  
+  // Ensure the returned object satisfies ValidMiddlewareObject
+  return { ...user } as Record<string, unknown>
 }
 
 // FileRouter for your app, can contain multiple FileRoutes

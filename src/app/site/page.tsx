@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import {
   Card,
   CardContent,
@@ -9,22 +10,18 @@ import {
 import { pricingCards } from "@/lib/constants";
 import { db } from "@/lib/db";
 import { razorpay } from "@/lib/razorpay";
-import { stripe } from "@/lib/stripe";
-import { currentUser } from "@clerk/nextjs";
 import clsx from "clsx";
-import { count } from "console";
 import { Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import CheckForAgency from "./CheckForAgency";
-import { Agency } from "@prisma/client";
 
 export default async function Home() {
+  const session = await auth()
   const plans = (await razorpay.plans.all({ count: 2 })).items
-  const user= await currentUser();
-  const agency = user? await db.agency.findFirst({
+  const user = session?.user
+  const agency = user && user.email? await db.agency.findFirst({
     where: {
-      companyEmail: user?.emailAddresses[0].emailAddress
+      companyEmail: user.email
     }
   }):null
   return (

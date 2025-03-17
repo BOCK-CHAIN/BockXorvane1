@@ -29,6 +29,8 @@ import CustomModal from '../global/custom-modal'
 import SubAccountDetails from '../forms/subaccount-details'
 import { Separator } from '../ui/separator'
 import { icons } from '@/lib/constants'
+import { usePathname, useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
 
 type Props = {
   defaultOpen?: boolean
@@ -51,6 +53,8 @@ const MenuOptions = ({
 }: Props) => {
   const { setOpen } = useModal()
   const [isMounted, setIsMounted] = useState(false)
+  const router = usePathname();
+
 
   const openState = useMemo(
     () => (defaultOpen ? { open: true } : {}),
@@ -182,8 +186,29 @@ const MenuOptions = ({
                   <CommandGroup heading="Accounts">
                     {!!subAccounts
                       ? subAccounts.map((subaccount) => (
-                          <CommandItem key={subaccount.id}>
-                            {defaultOpen ? (
+                        <CommandItem key={subaccount.id}>
+                          {defaultOpen ? (
+                            <Link
+                              href={`/subaccount/${subaccount.id}`}
+                              className="flex gap-4 w-full h-full"
+                            >
+                              <div className="relative w-16">
+                                <Image
+                                  src={subaccount.subAccountLogo}
+                                  alt="subaccount Logo"
+                                  fill
+                                  className="rounded-md object-contain"
+                                />
+                              </div>
+                              <div className="flex flex-col flex-1">
+                                {subaccount.name}
+                                <span className="text-muted-foreground">
+                                  {subaccount.address}
+                                </span>
+                              </div>
+                            </Link>
+                          ) : (
+                            <SheetClose asChild>
                               <Link
                                 href={`/subaccount/${subaccount.id}`}
                                 className="flex gap-4 w-full h-full"
@@ -203,59 +228,38 @@ const MenuOptions = ({
                                   </span>
                                 </div>
                               </Link>
-                            ) : (
-                              <SheetClose asChild>
-                                <Link
-                                  href={`/subaccount/${subaccount.id}`}
-                                  className="flex gap-4 w-full h-full"
-                                >
-                                  <div className="relative w-16">
-                                    <Image
-                                      src={subaccount.subAccountLogo}
-                                      alt="subaccount Logo"
-                                      fill
-                                      className="rounded-md object-contain"
-                                    />
-                                  </div>
-                                  <div className="flex flex-col flex-1">
-                                    {subaccount.name}
-                                    <span className="text-muted-foreground">
-                                      {subaccount.address}
-                                    </span>
-                                  </div>
-                                </Link>
-                              </SheetClose>
-                            )}
-                          </CommandItem>
-                        ))
+                            </SheetClose>
+                          )}
+                        </CommandItem>
+                      ))
                       : 'No Accounts'}
                   </CommandGroup>
                 </CommandList>
-                {(user?.role === 'AGENCY_OWNER' ||
-                  user?.role === 'AGENCY_ADMIN') && (
-                  <SheetClose>
-                    <Button
-                      className="w-full flex gap-2"
-                      onClick={() => {
-                        setOpen(
-                          <CustomModal
-                            title="Create A Subaccount"
-                            subheading="You can switch between your agency account and the subaccount from the sidebar"
-                          >
-                            <SubAccountDetails
-                              agencyDetails={user?.Agency as Agency}
-                              userId={user?.id as string}
-                              userName={user?.name}
-                            />
-                          </CustomModal>
-                        )
-                      }}
-                    >
-                      <PlusCircleIcon size={15} />
-                      Create Sub Account
-                    </Button>
-                  </SheetClose>
-                )}
+                {(user.role === 'AGENCY_OWNER' ||
+                  user.role === 'AGENCY_ADMIN') && (
+                    <SheetClose>
+                      <Button
+                        className="w-full flex gap-2"
+                        onClick={() => {
+                          setOpen(
+                            <CustomModal
+                              title="Create A Subaccount"
+                              subheading="You can switch between your agency account and the subaccount from the sidebar"
+                            >
+                              <SubAccountDetails
+                                agencyDetails={user?.Agency as Agency}
+                                userId={user?.id as string}
+                                userName={user?.name}
+                              />
+                            </CustomModal>
+                          )
+                        }}
+                      >
+                        <PlusCircleIcon size={15} />
+                        Create Sub Account
+                      </Button>
+                    </SheetClose>
+                  )}
               </Command>
             </PopoverContent>
           </Popover>
@@ -268,31 +272,33 @@ const MenuOptions = ({
                 <CommandEmpty>No Results Found</CommandEmpty>
                 <CommandGroup className="overflow-visible">
                   {sidebarOpt.map((sidebarOptions) => {
-                    let val
+                    let val;
                     const result = icons.find(
                       (icon) => icon.value === sidebarOptions.icon
-                    )
+                    );
                     if (result) {
-                      val = <result.path />
+                      val = <result.path />;
                     }
+
                     return (
                       <CommandItem
                         key={sidebarOptions.id}
-                        className="md:w-[320px] w-full"
+                        className={cn("md:w-[320px] w-full hover:bg-blue-300 hover:text-black cursor-default", router === sidebarOptions.link ? "bg-primary hover:bg-primary" : "")}
                       >
                         <Link
                           href={sidebarOptions.link}
-                          className="flex items-center gap-2 hover:bg-transparent rounded-md transition-all md:w-full w-[320px]"
+                          className="flex items-center gap-2 rounded-md md:w-full w-[320px]  "
                         >
                           {val}
                           <span>{sidebarOptions.name}</span>
                         </Link>
                       </CommandItem>
-                    )
+                    );
                   })}
                 </CommandGroup>
               </CommandList>
             </Command>
+
           </nav>
         </div>
       </SheetContent>

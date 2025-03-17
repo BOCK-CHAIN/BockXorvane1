@@ -2,16 +2,18 @@ import { db } from '@/lib/db'
 import React from 'react'
 import DataTable from './data-table'
 import { Plus } from 'lucide-react'
-import { currentUser } from '@clerk/nextjs'
 import { columns } from './columns'
 import SendInvitation from '@/components/forms/send-invitation'
+import { auth } from '@/auth'
 
 type Props = {
   params: { agencyId: string }
 }
 
 const TeamPage = async ({ params }: Props) => {
-  const authUser = await currentUser()
+  const session = await auth()
+    const authUser = session?.user
+    
   const teamMembers = await db.user.findMany({
     where: {
       Agency: {
@@ -44,7 +46,7 @@ const TeamPage = async ({ params }: Props) => {
           Add
         </>
       }
-      modalChildren={<SendInvitation email={authUser.emailAddresses[0].emailAddress} agencyId={agencyDetails.id} />}
+      modalChildren={<SendInvitation email={authUser.email} agencyId={agencyDetails.id} />}
       filterValue="name"
       columns={columns}
       data={teamMembers}

@@ -49,6 +49,7 @@ import {
 } from "@/lib/queries";
 import { Button } from "../ui/button";
 import Loading from "../global/loading";
+import { useSession } from "next-auth/react";
 
 type Props = {
   data?: Partial<Agency>;
@@ -71,6 +72,8 @@ const AgencyDetails = ({ data }: Props) => {
   const { toast } = useToast();
   const router = useRouter();
   const [deletingAgency, setDeletingAgency] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { data: session, update } = useSession()
   const form = useForm<z.infer<typeof FormSchema>>({
     mode: "onChange",
     resolver: zodResolver(FormSchema),
@@ -100,6 +103,8 @@ const AgencyDetails = ({ data }: Props) => {
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
+      setLoading(true)
+      console.log("hello")
       let newUserData;
       let custId, subId;
       if (!data?.id) {
@@ -126,26 +131,32 @@ const AgencyDetails = ({ data }: Props) => {
           },
         };
         let customerResponse;
-        try {
-          customerResponse = await fetch("/api/razorpay/create-customer", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(bodyData),
-          });
-        } catch (error) {
-          console.log(error);
-        }
-        if (!customerResponse) return;
+        // try {
+        //   customerResponse = await fetch("/api/razorpay/create-customer", {
+        //     method: "POST",
+        //     headers: {
+        //       "Content-Type": "application/json",
+        //     },
+        //     body: JSON.stringify(bodyData),
+        //   });
+        // } catch (error) {
+        //   console.log(error);
+        // }
+        // if (!customerResponse) return;
 
-        const customerData: { customerId: string } =
-          await customerResponse.json();
-        custId = customerData.customerId;
+        // const customerData: { customerId: string } =
+        //   await customerResponse.json();
+        // custId = customerData.customerId;
       }
 
       newUserData = await initUser({ role: "AGENCY_OWNER" });
-      if(!custId) return;
+      const updateSession = await update({
+        ...session,
+        user: {
+          ...session?.user,
+          role: "AGENCY_OWNER"
+        }
+      })
 
       const response = await upsertAgency(
         {
@@ -175,6 +186,7 @@ const AgencyDetails = ({ data }: Props) => {
       if (response) {
         return router.push(`/agency/${response.id}`);
       }
+      setLoading(false)
     } catch (error) {
       console.log(error);
       toast({
@@ -182,6 +194,7 @@ const AgencyDetails = ({ data }: Props) => {
         title: "Oppse!",
         description: "could not create your agency",
       });
+      setLoading(false)
     }
   };
   const handleDeleteAgency = async () => {

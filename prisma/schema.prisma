@@ -1,11 +1,24 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/webbuild"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model AuthDetials {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      Role 
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  sessions  Session[]
+  accounts  Account[]
+
+  @@map("users")
 }
 
 model User {
@@ -368,6 +381,7 @@ model AddOns {
 }
 
 enum Role {
+  NONE
   AGENCY_OWNER
   AGENCY_ADMIN
   SUBACCOUNT_USER
@@ -424,4 +438,43 @@ enum InvitationStatus {
 enum Plan {
   plan_PGse2GnM3i4oIb
   plan_PGtmVIiauaYoAH
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user AuthDetials @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String      @unique
+  userId       String
+  expires      DateTime
+  user         AuthDetials @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
 }

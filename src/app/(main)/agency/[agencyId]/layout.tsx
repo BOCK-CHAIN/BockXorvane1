@@ -1,3 +1,4 @@
+import { auth } from '@/auth'
 import BlurPage from '@/components/global/blur-page'
 import InfoBar from '@/components/global/infobar'
 import Sidebar from '@/components/sidebar'
@@ -6,7 +7,6 @@ import {
   getNotificationAndUser,
   verifyAndAcceptInvitation,
 } from '@/lib/queries'
-import { currentUser } from '@clerk/nextjs'
 import { redirect } from 'next/navigation'
 import React from 'react'
 
@@ -17,8 +17,8 @@ type Props = {
 
 const layout = async ({ children, params }: Props) => {
   const agencyId = await verifyAndAcceptInvitation()
-  const user = await currentUser()
-  console.log('user', user)
+  const session = await auth();
+  const user = session?.user
 
   if (!user) {
     return redirect('/')
@@ -28,9 +28,13 @@ const layout = async ({ children, params }: Props) => {
     return redirect('/agency')
   }
 
+  console.log(user)
+
+  // TODO: provide the role in the sesssion
+
   if (
-    user.privateMetadata.role !== 'AGENCY_OWNER' &&
-    user.privateMetadata.role !== 'AGENCY_ADMIN'
+    user.role !== 'AGENCY_OWNER' &&
+    user.role !== 'AGENCY_ADMIN'
   )
     return <Unauthorized />
 

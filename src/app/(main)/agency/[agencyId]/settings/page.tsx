@@ -1,7 +1,7 @@
+import { auth } from '@/auth'
 import AgencyDetails from '@/components/forms/agency-details'
 import UserDetails from '@/components/forms/user-details'
 import { db } from '@/lib/db'
-import { currentUser } from '@clerk/nextjs'
 import React from 'react'
 
 type Props = {
@@ -9,12 +9,13 @@ type Props = {
 }
 
 const SettingsPage = async ({ params }: Props) => {
-  const authUser = await currentUser()
+  const session = await auth()
+  const authUser = session?.user
   if (!authUser) return null
 
   const userDetails = await db.user.findUnique({
     where: {
-      email: authUser.emailAddresses[0].emailAddress,
+      email: authUser.email,
     },
   })
 

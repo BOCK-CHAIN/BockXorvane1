@@ -1,8 +1,8 @@
+import { auth } from '@/auth'
 import SubAccountDetails from '@/components/forms/subaccount-details'
 import UserDetails from '@/components/forms/user-details'
 import BlurPage from '@/components/global/blur-page'
 import { db } from '@/lib/db'
-import { currentUser } from '@clerk/nextjs'
 import React from 'react'
 
 type Props = {
@@ -10,11 +10,12 @@ type Props = {
 }
 
 const SubaccountSettingPage = async ({ params }: Props) => {
-  const authUser = await currentUser()
+  const session = await auth()
+    const authUser = session?.user
   if (!authUser) return
   const userDetails = await db.user.findUnique({
     where: {
-      email: authUser.emailAddresses[0].emailAddress,
+      email: authUser.email,
     },
   })
   if (!userDetails) return

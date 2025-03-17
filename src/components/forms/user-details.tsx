@@ -90,6 +90,7 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
       'AGENCY_ADMIN',
       'SUBACCOUNT_USER',
       'SUBACCOUNT_GUEST',
+      'NONE'
     ]),
   })
 

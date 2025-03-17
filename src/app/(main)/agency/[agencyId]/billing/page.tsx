@@ -15,15 +15,15 @@ import PricingCard from "./_components/pricing-card";
 // import clsx from "clsx";
 import SubscriptionHelper from "./_components/subscription-helper";
 import { razorpay } from "@/lib/razorpay";
-import { currentUser } from "@clerk/nextjs/server";
+import { auth } from "@/auth";
 
 type Props = {
   params: { agencyId: string };
 };
 
 const page = async ({ params }: Props) => {
-  const user = await currentUser();
-
+  const session = await auth();
+  const user = session?.user;
   const agencySubscription = await db.agency.findUnique({
     where: {
       id: params.agencyId,
@@ -54,8 +54,8 @@ const page = async ({ params }: Props) => {
         <PricingCard
          agencyId={params.agencyId}
           userInfo={{
-            email: user?.emailAddresses[0].emailAddress || "",
-            name: user?.firstName || "",
+            email: user?.email || "",
+            name: user?.name || "",
           }}
           planId={currentPlanDetails?.plainId}
           planExists={agencySubscription?.Subscription?.active === true}
