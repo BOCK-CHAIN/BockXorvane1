@@ -22,8 +22,9 @@ import {
   ShoppingCart,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import Razorpay from "razorpay";
-import React from "react";
+import React, { useEffect } from "react";
 
 const Page = async ({
   params,

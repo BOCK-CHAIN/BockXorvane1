@@ -7,7 +7,7 @@ import {
   getNotificationAndUser,
   verifyAndAcceptInvitation,
 } from '@/lib/queries'
-import { redirect } from 'next/navigation'
+import { redirect, usePathname, useRouter } from 'next/navigation'
 import React from 'react'
 
 type Props = {
@@ -28,27 +28,23 @@ const layout = async ({ children, params }: Props) => {
     return redirect('/agency')
   }
 
-  console.log(user)
-
-  // TODO: provide the role in the sesssion
 
   if (
     user.role !== 'AGENCY_OWNER' &&
     user.role !== 'AGENCY_ADMIN'
   )
     return <Unauthorized />
-
   let allNoti: any = []
   const notifications = await getNotificationAndUser(agencyId)
   if (notifications) allNoti = notifications
 
   return (
-    <div className="h-screen overflow-hidden">
+    <div className="h-screen overflow-hidden no-scrollbar">
       <Sidebar
         id={params.agencyId}
         type="agency"
       />
-      <div className="md:pl-[300px]">
+      <div className="md:pl-[300px] ">
         <InfoBar
           notifications={allNoti}
           role={allNoti.User?.role}

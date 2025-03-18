@@ -26,6 +26,8 @@ const TeamPage = async ({ params }: Props) => {
     },
   })
 
+  console.log(teamMembers)
+
   if (!authUser) return null
   const agencyDetails = await db.agency.findUnique({
     where: {

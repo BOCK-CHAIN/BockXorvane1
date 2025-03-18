@@ -283,7 +283,7 @@ const MenuOptions = ({
                     return (
                       <CommandItem
                         key={sidebarOptions.id}
-                        className={cn("md:w-[320px] w-full hover:bg-blue-300 hover:text-black cursor-default", router === sidebarOptions.link ? "bg-primary hover:bg-primary" : "")}
+                        className={cn("md:w-[320px] w-full hover:bg-gray-400 hover:text-black cursor-default", router === sidebarOptions.link ? "bg-primary hover:bg-primary" : "")}
                       >
                         <Link
                           href={sidebarOptions.link}

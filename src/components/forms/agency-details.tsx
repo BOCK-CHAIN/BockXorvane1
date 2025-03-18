@@ -50,6 +50,7 @@ import {
 import { Button } from "../ui/button";
 import Loading from "../global/loading";
 import { useSession } from "next-auth/react";
+import Loader from "../ui/loader";
 
 type Props = {
   data?: Partial<Agency>;
@@ -104,7 +105,6 @@ const AgencyDetails = ({ data }: Props) => {
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
       setLoading(true)
-      console.log("hello")
       let newUserData;
       let custId, subId;
       if (!data?.id) {
@@ -422,8 +422,8 @@ const AgencyDetails = ({ data }: Props) => {
                   />
                 </div>
               )}
-              <Button type="submit" disabled={isLoading}>
-                {isLoading ? <Loading /> : "Save Agency Information"}
+              <Button type="submit" disabled={isLoading} className="min-w-28">
+                {isLoading ? <Loader state /> : "Save Agency Information"}
               </Button>
             </form>
           </Form>

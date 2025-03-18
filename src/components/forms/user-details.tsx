@@ -49,6 +49,7 @@ import Loading from '../global/loading'
 import { Separator } from '../ui/separator'
 import { Switch } from '../ui/switch'
 import { v4 } from 'uuid'
+import Loader from '../ui/loader'
 
 type Props = {
   id: string | null
@@ -341,8 +342,9 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
             <Button
               disabled={form.formState.isSubmitting}
               type="submit"
+              className=' min-w-32'
             >
-              {form.formState.isSubmitting ? <Loading /> : 'Save User Details'}
+              {form.formState.isSubmitting ? <Loader state  /> : 'Save User Details'}
             </Button>
             {authUserData?.role === 'AGENCY_OWNER' && (
               <div>

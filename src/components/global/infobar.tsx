@@ -16,6 +16,7 @@ import { Card } from '../ui/card'
 import { Switch } from '../ui/switch'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { ModeToggle } from './mode-toggle'
+import UserButton from './user-button'
 
 type Props = {
   notifications: NotificationWithUser | []
@@ -51,7 +52,8 @@ const InfoBar = ({ notifications, subAccountId, className, role }: Props) => {
         )}
       >
         <div className="flex items-center gap-2 ml-auto">
-          {/* <UserButton afterSignOutUrl="/" /> */}
+          <UserButton />
+
           <Sheet>
             <SheetTrigger>
               <div className="rounded-full w-9 h-9 bg-primary flex items-center justify-center text-white">

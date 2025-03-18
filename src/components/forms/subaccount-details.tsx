@@ -32,6 +32,7 @@ import { saveActivityLogsNotification, upsertSubAccount } from '@/lib/queries'
 import { useEffect } from 'react'
 import Loading from '../global/loading'
 import { useModal } from '@/providers/modal-provider'
+import Loader from '../ui/loader'
 
 const formSchema = z.object({
   name: z.string(),
@@ -318,8 +319,9 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             <Button
               type="submit"
               disabled={isLoading}
+              className='min-w-28'
             >
-              {isLoading ? <Loading /> : 'Save Account Information'}
+              {isLoading ? <Loader state /> : 'Save Account Information'}
             </Button>
           </form>
         </Form>

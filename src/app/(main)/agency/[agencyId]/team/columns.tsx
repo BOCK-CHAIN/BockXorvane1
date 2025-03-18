@@ -58,12 +58,13 @@ export const columns: ColumnDef<UsersWithAgencySubAccountPermissionsSidebarOptio
       accessorKey: 'name',
       header: 'Name',
       cell: ({ row }) => {
-        const avatarUrl = row.getValue('avatarUrl') as string
+        console.log(row.getValue('avatarUrl'))
+        const avatarUrl = row.getValue('avatarUrl') as string | undefined | null
         return (
           <div className="flex items-center gap-4">
             <div className="h-11 w-11 relative flex-none">
               <Image
-                src={avatarUrl}
+                src={avatarUrl ? avatarUrl: '/profile.jpg'}
                 fill
                 className="rounded-full object-cover"
                 alt="avatar image"
@@ -82,7 +83,6 @@ export const columns: ColumnDef<UsersWithAgencySubAccountPermissionsSidebarOptio
       },
     },
     { accessorKey: 'email', header: 'Email' },
-
     {
       accessorKey: 'SubAccount',
       header: 'Owned Accounts',
@@ -150,6 +150,7 @@ export const columns: ColumnDef<UsersWithAgencySubAccountPermissionsSidebarOptio
       },
     },
   ]
+
 
 interface CellActionsProps {
   rowData: UsersWithAgencySubAccountPermissionsSidebarOptions
