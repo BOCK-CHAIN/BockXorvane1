@@ -39,9 +39,7 @@ export const authConfig = {
       if(trigger === "update"){
         return {...token, ...session.user}
       }
-      // console.log("hello")
-      // console.log(user)
-      // console.log(account)
+
       if (account?.provider === "credentials") {
         if (user) {
           token.sub = user.id;
@@ -59,8 +57,6 @@ export const authConfig = {
       return !!auth?.user;
     },
     async session({ session, user, token }) {
-      // console.log("user",user)
-      // console.log("token",token)
       if (token) {
         session.user.id = token.sub as string;
         session.user.email = token.email as string;

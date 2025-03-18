@@ -69,6 +69,20 @@ export const getAuthuser = async (userId: string) => {
   }
 };
 
+export const getUserByEmail = async (email: string) => {  
+  try {
+    const user = await db.authDetials.findUnique({
+      where: {
+        email,
+      },
+    });
+
+    return user;
+  } catch (error: any) {
+    return null;
+  }
+}
+
 export const addUser = async (
   email: string,
   password: string,
@@ -118,12 +132,38 @@ export async function signInUser(email: string, password: string) {
       email: email,
       password: password,
     });
-    
+    return {
+      success: true
+    }
   } catch (error: any) {
-    console.log(error)
     return {
       success: false,
       message: error.message,
     };
   }
+}
+
+export const deleteNotification = async (id: string) => {
+  try{
+    await db.notification.delete({
+      where:{
+        id: id
+      }
+    })
+  }catch(err){
+    return;
+  }
+}
+
+export const deleteAllNotifications = async (agencyId: string) => {  
+  try{
+    await db.notification.deleteMany({
+      where:{
+        agencyId: agencyId
+      }
+    })
+  }catch(err){
+    return;
+  }
+
 }

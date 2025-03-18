@@ -9,7 +9,6 @@ type Props = {
 
 const SubAccountMainPage = async ({ searchParams }: Props) => {
   const agencyId = await verifyAndAcceptInvitation()
-  // console.log(agencyId)
   if (!agencyId) {
     return <Unauthorized />
   }
@@ -20,10 +19,6 @@ const SubAccountMainPage = async ({ searchParams }: Props) => {
   const getFirstSubaccountWithAccess = user.Permissions.find(
     (permission) => permission.access === true
   )
-
-  console.log("user",user)
-
-  // console.log(getFirstSubaccountWithAccess)
 
   if (searchParams.state) {
     const statePath = searchParams.state.split('___')[0]

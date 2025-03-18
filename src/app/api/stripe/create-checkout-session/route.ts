@@ -36,7 +36,6 @@ export async function POST(req: Request) {
 
   const subscriptionPriceExists = prices.find((price) => price.recurring)
   // if (!agencyIdConnectedAccountId?.Agency.connectAccountId) {
-  //   console.log('Agency is not connected')
   //   return NextResponse.json({ error: 'Agency account is not connected' })
   // }
 

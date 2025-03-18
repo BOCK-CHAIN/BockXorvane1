@@ -188,7 +188,6 @@ const AgencyDetails = ({ data }: Props) => {
       }
       setLoading(false)
     } catch (error) {
-      console.log(error);
       toast({
         variant: "destructive",
         title: "Oppse!",
@@ -209,7 +208,6 @@ const AgencyDetails = ({ data }: Props) => {
       });
       router.refresh();
     } catch (error) {
-      console.log(error);
       toast({
         variant: "destructive",
         title: "Oppse!",

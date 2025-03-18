@@ -19,7 +19,6 @@ export async function POST(req: Request) {
     })
     return Response.json({ customerId: customer.id });
   } catch (error) {
-    console.log("🔴 Error", error);
     return new NextResponse("Internal Server Error", { status: 500 });
   }
 }

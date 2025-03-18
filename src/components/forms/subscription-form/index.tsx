@@ -39,7 +39,6 @@ const SubscriptionForm = ({ selectedPriceId }: Props) => {
         description: 'Your payment has been successfully processed. ',
       })
     } catch (error) {
-      console.log(error)
       toast({
         variant: 'destructive',
         title: 'Payment failed',

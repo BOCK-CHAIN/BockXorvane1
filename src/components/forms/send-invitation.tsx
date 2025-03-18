@@ -31,6 +31,7 @@ import Loading from "../global/loading";
 import { saveActivityLogsNotification, sendInvitation } from "@/lib/queries";
 import { useToast } from "../ui/use-toast";
 import { useModal } from "@/providers/modal-provider";
+import { getUserByEmail } from "@/actions/user";
 
 interface SendInvitationProps {
   agencyId: string;
@@ -65,6 +66,16 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId, email }) => {
         setClose();
         return;
       }
+      const user = await getUserByEmail(values.email)
+      if(user){
+        toast({
+          variant: "destructive",
+          title: "User already exists",
+          description: "Cannot invite user that already exists",
+        });
+        setClose();
+        return;
+      }
       const res = await sendInvitation(values.role, values.email, agencyId);
       await saveActivityLogsNotification({
         agencyId: agencyId,
@@ -77,10 +88,9 @@ const SendInvitation: React.FC<SendInvitationProps> = ({ agencyId, email }) => {
       });
       setClose();
     } catch (error) {
-      console.log(error);
       toast({
         variant: "destructive",
-        title: "Oppse!",
+        title: "Sorry, something went wrong",
         description: (error as Error).message,
       });
       setClose();

@@ -27,7 +27,6 @@ const FunnelPage = async ({ params }: Props) => {
       },
     },
   })) as FunnelsForSubAccount
-  // console.log(funnelPages);
   const funnels = funnelPages?.FunnelPages;
   if (!funnelPages)
     return redirect(`/subaccount/${params.subaccountId}/funnels`);

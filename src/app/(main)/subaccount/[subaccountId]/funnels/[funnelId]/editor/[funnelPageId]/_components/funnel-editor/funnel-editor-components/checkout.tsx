@@ -68,7 +68,6 @@ const Checkout = (props: Props) => {
             }
           )
           const responseJson = await response.json()
-          console.log(responseJson)
           if (!responseJson) throw new Error('somethign went wrong')
           if (responseJson.error) {
             throw new Error(responseJson.error)
@@ -111,7 +110,6 @@ const Checkout = (props: Props) => {
     const funnelPages = await getFunnel(funnelId)
     if (!funnelPages || !pageDetails) return
     if (funnelPages.FunnelPages.length > pageDetails.order + 1) {
-      console.log(funnelPages.FunnelPages.length, pageDetails.order + 1)
       const nextPage = funnelPages.FunnelPages.find(
         (page) => page.order === pageDetails.order + 1
       )

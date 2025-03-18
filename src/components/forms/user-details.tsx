@@ -208,12 +208,14 @@ const UserDetails = ({ id, type, subAccounts, userData }: Props) => {
       } else {
         toast({
           variant: 'destructive',
-          title: 'Oppse!',
           description: 'Could not update user information',
         })
       }
     } else {
-      console.log('Error could not submit')
+      toast({
+        variant: 'destructive',
+        description: 'Could not update user information',
+      })
     }
   }
 

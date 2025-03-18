@@ -80,7 +80,6 @@ export const saveActivityLogsNotification = async ({
   }
 
   if (!userData) {
-    console.log("Could not find a user");
     return;
   }
 
@@ -246,7 +245,6 @@ export const initUser = async (newUser: Partial<User>) => {
   })
 
   const token = await getToken({ req: { headers: { cookie: "" } } });
-  console.log("token",token)
   if (token) {
     token.role = newUser.role || "SUBACCOUNT_USER";
   }

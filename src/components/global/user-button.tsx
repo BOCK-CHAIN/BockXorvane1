@@ -11,7 +11,6 @@ const UserButton = () => {
   const router = useRouter();
 
   if (!session?.user) return null; // Don't render if no user is logged in
-    console.log(session.user)
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

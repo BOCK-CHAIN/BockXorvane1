@@ -25,7 +25,6 @@ export async function POST(req: Request) {
           'Could not find the subscription Id to update the subscription.'
         )
       }
-      console.log('Updating the subscription')
       const currentSubscriptionDetails = await stripe.subscriptions.retrieve(
         subscriptionExists.Subscription.subscritiptionId
       )
@@ -49,7 +48,6 @@ export async function POST(req: Request) {
         clientSecret: subscription.latest_invoice.payment_intent.client_secret,
       })
     } else {
-      console.log('Createing a sub')
       const subscription = await stripe.subscriptions.create({
         customer: customerId,
         items: [
@@ -61,7 +59,6 @@ export async function POST(req: Request) {
         payment_settings: { save_default_payment_method: 'on_subscription' },
         expand: ['latest_invoice.payment_intent'],
       })
-      console.log(subscription)
       return NextResponse.json({
         subscriptionId: subscription.id,
         //@ts-ignore

@@ -12,10 +12,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   ...authConfig,
   // jwt: {
   //   encode: async function (params) {
-  //     console.log("hello")
   //     if (params.token?.credentials) {
   //       const sessionToken = uuidv4();
-  //       console.log("in")
   //       if (!params.token.sub) {
   //         throw new Error("No User found in the token");
   //       }
@@ -29,7 +27,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   //         userId: params.token.sub,
   //         expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
   //       });
-  //       console.log(createdSession)
   //       if (!createdSession) {
   //         throw new Error("Session not created");
   //       }
@@ -60,7 +57,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           );
           const res = await checkUser(email, password);
           if (res.success && res.data) {
-            console.log(res.data)
             return {
               id: res.data.id,
               email: res.data.email,

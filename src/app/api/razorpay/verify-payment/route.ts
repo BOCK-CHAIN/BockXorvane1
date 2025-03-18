@@ -55,7 +55,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
           agencyId: agencyId as string,
         },
       });
-      console.log(process.env.NEXT_PUBLIC_URL)
       return NextResponse.redirect(
         `${process.env.NEXT_PUBLIC_URL}agency/${agencyId}/billing`,
         {

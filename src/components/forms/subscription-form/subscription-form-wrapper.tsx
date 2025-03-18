@@ -70,7 +70,6 @@ const SubscriptionFormWrapper = ({
     if (!selectedPriceId) return;
     if (inititaePayment && !subscription.subscriptionId) {
       setLoading(true);
-      console.log("hello");
       const createSecret = async () => {
         const subscriptionResponse = await fetch(
           "/api/razorpay/create-subscription",

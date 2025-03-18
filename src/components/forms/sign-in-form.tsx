@@ -1,158 +1,123 @@
-'use client'
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { type z } from "zod";
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from "@/components/ui/form";
-import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
-import Image from "next/image";
-import { Loader2 } from "lucide-react";
-import { signInSchema } from "@/types/signInSchema";
-import { checkUser, signInUser } from "@/actions/user";
+"use client"
 
-export default function SignIn({
-    setIsOpened,
-}: {
-    setIsOpened?: (isOpened: boolean) => void;
-}) {
-    const [loading, setLoading] = React.useState(false);
-    const router = useRouter();
-    const form = useForm<z.infer<typeof signInSchema>>({
-        resolver: zodResolver(signInSchema),
-        defaultValues: {
-            email: "",
-            password: "",
-        },
-    });
+import { useState } from "react"
+import { Input } from "@/components/ui/input"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import type { z } from "zod"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { useRouter } from "next/navigation"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from "sonner"
+import { Loader2 } from "lucide-react"
+import { signInSchema } from "@/types/signInSchema"
+import { signInUser } from "@/actions/user"
+import { Button } from "../ui/button"
+import XorvaneLogo from "../global/XorvaneLogo"
 
-    async function onSubmit(data: z.infer<typeof signInSchema>) {
-        try {
-            setLoading(true);
+export default function SignInForm() {
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
-            const isValid = signInSchema.safeParse(data);
-            if (!isValid.success) {
-                setLoading(false);
-                return null;
-            }
-            const { email, password } = await signInSchema.parseAsync(data);
+  const form = useForm<z.infer<typeof signInSchema>>({
+    resolver: zodResolver(signInSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  })
 
-            const check = await checkUser(email, password);
-            if (!check.success) {
-                toast.error(check.message);
-                setLoading(false);
-                return;
-            }
-            const result = await signInUser(email,password)
-            if(result){
-                toast.error("Error while signing in. Please check you credentials.");
-            }
-            toast.success("Signed in successfully.");
-            router.replace("/agency");
-            
-        } catch (err) {
-            toast.error("Something went wrong. Please try again.");
-        }
-        setLoading(false);
+  async function onSubmit(data: z.infer<typeof signInSchema>) {
+    try {
+      setLoading(true)
+      const { email, password } = await signInSchema.parseAsync(data)
+      const res = await signInUser(email, password)
+
+      if (res.success) {
+        toast.success("Signed in successfully")
+        router.replace("/dashboard")
+      } else {
+        toast.error(res?.message || "Invalid credentials")
+      }
+    } catch (err) {
+      toast.error("Something went wrong. Please try again.")
     }
+    setLoading(false)
+  }
 
-    return (
-        <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900 p-4">
-            <Card className="w-full max-w-md rounded-2xl border border-gray-700 bg-neutral-800 bg-opacity-50 p-8 shadow-xl backdrop-blur-md">
-                <CardHeader className="flex flex-col items-center gap-4">
-                    <Image src="/logo.svg" alt="Logo" width="120" height="120" />
-                    <CardTitle className="text-4xl font-bold text-white">
-                        Sign In
-                    </CardTitle>
-                    <p className="text-lg text-gray-200">Welcome back! Please log in.</p>
-                </CardHeader>
-                <CardContent>
-                    <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                disabled={loading}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-lg text-gray-100">
-                                            Email
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                className="w-full rounded-lg border border-gray-600 bg-neutral-700 text-lg text-white focus:ring-2 focus:ring-indigo-500"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage className="text-base text-red-400" />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={form.control}
-                                name="password"
-                                disabled={loading}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="text-lg text-gray-100">
-                                            Password
-                                        </FormLabel>
-                                        <FormControl>
-                                            <Input
-                                                type="password"
-                                                className="rounded-lg border border-gray-600 bg-neutral-700 text-lg text-white focus:ring-2 focus:ring-indigo-500"
-                                                {...field}
-                                            />
-                                        </FormControl>
-                                        <FormMessage className="text-base text-red-400" />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <Button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full transform rounded-lg bg-indigo-600 py-3 text-xl font-semibold transition duration-300 ease-in-out hover:scale-105 hover:bg-indigo-500"
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader2 /> Signin In
-                                    </>
-                                ) : (
-                                    "Sign In"
-                                )}
-                            </Button>
-                            <div className="text-center">
-                                <Button
-                                    type="button"
-                                    onClick={() => {
-                                        if (setIsOpened) {
-                                            setIsOpened(false);
-                                            router.replace("/auth/sign-up");
-                                        } else {
-                                            window.location.replace("/auth/sign-up");
-                                        }
-                                    }}
-                                    className="text-base text-indigo-300 hover:text-indigo-200"
-                                    variant="link"
-                                >
-                                    Don&apos;t have an account? Sign up
-                                </Button>
-                            </div>
-                        </form>
-                    </Form>
-                </CardContent>
-            </Card>
-        </div>
-    );
+  return (
+    <div className="flex min-h-screen w-full items-center justify-center bg-gradient-to-br from-background to-background/80 p-4 dotPattern">
+      <Card className="w-full max-w-md rounded-2xl border border-border/40 bg-card/80 shadow-xl backdrop-blur-md p-6 md:p-8">
+        <CardHeader className="flex flex-col items-center gap-4 p-0">
+          <XorvaneLogo />
+          <CardTitle className="text-3xl font-semibold text-foreground">Sign In</CardTitle>
+          <p className="text-sm text-muted-foreground">Enter your email and password</p>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm text-foreground">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={loading}
+                        className="w-full rounded-lg border border-input bg-background p-3 text-sm text-foreground focus:ring-2 focus:ring-primary"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-sm text-foreground">Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={loading}
+                        type="password"
+                        className="w-full rounded-lg border border-input bg-background p-3 text-sm text-foreground focus:ring-2 focus:ring-primary"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage className="text-xs text-red-400" />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full transform rounded-lg bg-primary p-3 text-lg font-semibold text-primary-foreground transition duration-300 ease-in-out hover:scale-105 hover:bg-primary/90"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" /> Signing In...
+                  </>
+                ) : (
+                  "Sign In"
+                )}
+              </Button>
+            </form>
+          </Form>
+          <div className="text-center mt-4">
+            <Button
+              type="button"
+              onClick={() => router.replace("/auth/sign-up")}
+              className="text-sm text-primary hover:text-primary/80"
+              variant="link"
+            >
+              Don't have an account? Sign up
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }

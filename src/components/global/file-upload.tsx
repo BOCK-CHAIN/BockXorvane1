@@ -32,7 +32,6 @@ const FileUpload = ({ apiEndpoint, onChange, value }: Props) => {
 
   const submit = async (file: File) => {
     try {
-      console.log("filetpe",file.type)
       setLoading(true)
       const resp = await fetch(`/api/signedUrl`, {
         method: 'POST',
@@ -41,7 +40,6 @@ const FileUpload = ({ apiEndpoint, onChange, value }: Props) => {
           apiEndpoint: apiEndpoint
         })
       })
-      console.log(resp)
       const url = await resp.text();
 
       if (!url) {

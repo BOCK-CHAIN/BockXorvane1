@@ -20,15 +20,12 @@ const SubaccountLayout = async ({ children, params }: Props) => {
   const agencyId = await verifyAndAcceptInvitation()
   if (!agencyId) return <Unauthorized />
   const session = await auth()
-    const user = session?.user
-    console.log("sub",user)
+  const user = session?.user
   if (!user) {
     return redirect('/')
   }
 
   let notifications: any = []
-
-  //  TODO: Add the role to the session.
 
   if (user.role === "NONE") {
     return <Unauthorized />
@@ -69,11 +66,12 @@ const SubaccountLayout = async ({ children, params }: Props) => {
           notifications={notifications}
           role={user.role as Role}
           subAccountId={params.subaccountId as string}
+          agencyId={agencyId}
         />
         <div className="relative">{children}</div>
       </div>
     </div>
   )
-} 
+}
 
 export default SubaccountLayout

@@ -38,7 +38,6 @@ type Props = {
 };
 
 const FunnelSteps = ({ funnel, funnelId, pages, subaccountId }: Props) => {
-  console.log("funnelsteps", pages);
   const router = useRouter();
 
   const [clickedPage, setClickedPage] = useState<FunnelPage | undefined>(
@@ -96,7 +95,6 @@ const FunnelSteps = ({ funnel, funnelId, pages, subaccountId }: Props) => {
           funnelId
         );
       } catch (error) {
-        console.log(error);
         toast({
           variant: "destructive",
           title: "Failed",

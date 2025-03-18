@@ -28,7 +28,6 @@ const layout = async ({ children, params }: Props) => {
     return redirect('/agency')
   }
 
-
   if (
     user.role !== 'AGENCY_OWNER' &&
     user.role !== 'AGENCY_ADMIN'
@@ -48,6 +47,7 @@ const layout = async ({ children, params }: Props) => {
         <InfoBar
           notifications={allNoti}
           role={allNoti.User?.role}
+          agencyId={agencyId}
         />
         <div className="relative">
           <BlurPage>{children}</BlurPage>

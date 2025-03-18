@@ -58,7 +58,6 @@ export const columns: ColumnDef<UsersWithAgencySubAccountPermissionsSidebarOptio
       accessorKey: 'name',
       header: 'Name',
       cell: ({ row }) => {
-        console.log(row.getValue('avatarUrl'))
         const avatarUrl = row.getValue('avatarUrl') as string | undefined | null
         return (
           <div className="flex items-center gap-4">
