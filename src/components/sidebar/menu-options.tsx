@@ -65,6 +65,8 @@ const MenuOptions = ({
     setIsMounted(true)
   }, [])
 
+  console.log(sidebarLogo)
+
   if (!isMounted) return
 
   return (
@@ -98,7 +100,7 @@ const MenuOptions = ({
         <div>
           <AspectRatio ratio={16 / 5}>
             <Image
-              src={sidebarLogo}
+              src={sidebarLogo ? sidebarLogo : '/profile.jpg'}
               alt="Sidebar Logo"
               fill
               className="rounded-md object-contain"
@@ -144,7 +146,7 @@ const MenuOptions = ({
                             >
                               <div className="relative w-16">
                                 <Image
-                                  src={user?.Agency?.agencyLogo}
+                                  src={user?.Agency?.agencyLogo ? user.Agency.agencyLogo: '/profile.jpg'}
                                   alt="Agency Logo"
                                   fill
                                   className="rounded-md object-contain"
@@ -165,7 +167,7 @@ const MenuOptions = ({
                               >
                                 <div className="relative w-16">
                                   <Image
-                                    src={user?.Agency?.agencyLogo}
+                                    src={user?.Agency?.agencyLogo ? user.Agency.agecncyLogo : '/profile.jpg'}
                                     alt="Agency Logo"
                                     fill
                                     className="rounded-md object-contain"
@@ -194,7 +196,7 @@ const MenuOptions = ({
                             >
                               <div className="relative w-16">
                                 <Image
-                                  src={subaccount.subAccountLogo}
+                                  src={subaccount.subAccountLogo? subaccount.subAccountLogo: '/profile.jpg'}
                                   alt="subaccount Logo"
                                   fill
                                   className="rounded-md object-contain"
@@ -215,7 +217,7 @@ const MenuOptions = ({
                               >
                                 <div className="relative w-16">
                                   <Image
-                                    src={subaccount.subAccountLogo}
+                                    src={subaccount.subAccountLogo ? subaccount.subAccountLogo : '/profile.jpg'}
                                     alt="subaccount Logo"
                                     fill
                                     className="rounded-md object-contain"
@@ -277,13 +279,13 @@ const MenuOptions = ({
                       (icon) => icon.value === sidebarOptions.icon
                     );
                     if (result) {
-                      val = <result.path />;
+                      val = <result.path   />;
                     }
 
                     return (
                       <CommandItem
                         key={sidebarOptions.id}
-                        className={cn("md:w-[320px] w-full hover:bg-gray-400 hover:text-black cursor-default", router === sidebarOptions.link ? "bg-primary hover:bg-primary" : "")}
+                        className={cn("md:w-[320px] w-full hover:bg-blue-500 hover:text-black cursor-default", router === sidebarOptions.link ? "bg-primary hover:bg-primary" : "")}
                       >
                         <Link
                           href={sidebarOptions.link}

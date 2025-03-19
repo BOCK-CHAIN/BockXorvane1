@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { signUpSchema } from "@/types/signUpSchema"
-import { addUser } from "@/actions/user"
+import { addUser, signInUser } from "@/actions/user"
 import { Button } from "@/components/ui/button"
 import XorvaneLogo from "@/components/global/XorvaneLogo"
 import Loader from "@/components/ui/loader"
@@ -36,8 +36,9 @@ export function SignUp() {
       const { email, password, name } = await signUpSchema.parseAsync(data)
       const res = await addUser(email, password, name)
       if (res.success) {
+        await signInUser(email, password)
         toast.success("Account created successfully")
-        router.replace("/auth/sign-in")
+        router.push('/agency')
       } else {
         toast.error(res.message)
       }

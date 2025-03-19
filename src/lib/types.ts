@@ -20,9 +20,6 @@ import {
 import { db } from './db'
 import { z } from 'zod'
 
-import Stripe from 'stripe'
-import Razorpay from 'razorpay'
-
 export type NotificationWithUser =
   | ({
       User: {
@@ -134,15 +131,12 @@ export type ShippingInfo = {
   name: string
 }
 
-export type StripeCustomerType = {
-  email: string
-  name: string
-  shipping: ShippingInfo
-  address: Address
-}
-
-export type PricesList = Stripe.ApiList<Stripe.Price>
-export type PlanList = Stripe.ApiList<Stripe.Plan>
+// export type StripeCustomerType = {
+//   email: string
+//   name: string
+//   shipping: ShippingInfo
+//   address: Address
+// }
 
 export type FunnelsForSubAccount = Prisma.PromiseReturnType<
   typeof getFunnels

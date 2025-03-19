@@ -246,6 +246,7 @@ export const initUser = async (newUser: Partial<User>) => {
 
   const token = await getToken({ req: { headers: { cookie: "" } } });
   if (token) {
+    token.sub = newUser.id
     token.role = newUser.role || "SUBACCOUNT_USER";
   }
 
@@ -277,7 +278,7 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
           create: [
             {
               name: "Dashboard",
-              icon: "category",
+              icon: "dashboard",
               link: `/agency/${agency.id}`,
             },
             {
@@ -291,11 +292,6 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
               link: `/agency/${agency.id}/team`,
             },
             {
-              name: "Launchpad",
-              icon: "clipboardIcon",
-              link: `/agency/${agency.id}/launchpad`,
-            },
-            {
               name: "Billing",
               icon: "payment",
               link: `/agency/${agency.id}/billing`,
@@ -307,6 +303,11 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
             },
           ],
         },
+        Subscription:{
+          create:{
+            plan: "NONE",
+          }
+        }
       },
     });
     return agencyDetails;
@@ -371,8 +372,8 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
         create: [
           {
             name: "Dashboard",
-            icon: "category",
-            link: `/subaccount/${subAccount.id}`,
+            icon: "dashboard",
+            link: `/agency/${subAccount.id}`,
           },
           {
             name: "Pipelines",
@@ -383,11 +384,6 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
             name: "Funnels",
             icon: "pipelines",
             link: `/subaccount/${subAccount.id}/funnels`,
-          },
-          {
-            name: "Launchpad",
-            icon: "clipboardIcon",
-            link: `/subaccount/${subAccount.id}/launchpad`,
           },
           {
             name: "Media",
@@ -404,11 +400,6 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
             name: "Settings",
             icon: "settings",
             link: `/subaccount/${subAccount.id}/settings`,
-          },
-          {
-            name: "Automations",
-            icon: "chip",
-            link: `/subaccount/${subAccount.id}/automations`,
           },
         ],
       },

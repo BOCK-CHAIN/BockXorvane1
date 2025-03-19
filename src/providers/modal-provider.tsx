@@ -1,8 +1,8 @@
 'use client'
-import { Plans } from '@/lib/plans'
-import { PlanList, PricesList, TicketDetails } from '@/lib/types'
+// import { Plans } from '@/lib/plans'
+import {  TicketDetails } from '@/lib/types'
 import { Agency, Contact, Plan, User } from '@prisma/client'
-import { RazorpayHeaders } from 'razorpay/dist/types/api'
+// import { RazorpayHeaders } from 'razorpay/dist/types/api'
 import { createContext, useContext, useEffect, useState } from 'react'
 
 interface ModalProviderProps {
@@ -14,10 +14,6 @@ export type ModalData = {
   agency?: Agency
   ticket?: TicketDetails[0]
   contact?: Contact
-  plans?: {
-    defaultPlanId: Plan
-    plans: Plans.RazorPayPlans[]
-  }
 }
 type ModalContextType = {
   data: ModalData

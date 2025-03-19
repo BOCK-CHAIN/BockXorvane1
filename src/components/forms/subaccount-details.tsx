@@ -33,6 +33,8 @@ import { useEffect } from 'react'
 import Loading from '../global/loading'
 import { useModal } from '@/providers/modal-provider'
 import Loader from '../ui/loader'
+import { db } from '@/lib/db'
+import { getSubscription } from '@/actions/billing'
 
 const formSchema = z.object({
   name: z.string(),
@@ -46,12 +48,7 @@ const formSchema = z.object({
   country: z.string(),
 })
 
-//CHALLENGE Give access for Subaccount Guest they should see a different view maybe a form that allows them to create tickets
-
-//CHALLENGE layout.tsx oonly runs once as a result if you remove permissions for someone and they keep navigating the layout.tsx wont fire again. solution- save the data inside metadata for current user.
-
 interface SubAccountDetailsProps {
-  //To add the sub account to the agency
   agencyDetails: Agency
   details?: Partial<SubAccount>
   userId: string
@@ -84,6 +81,13 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
+      const subscription =await getSubscription(agencyDetails.id)
+      if(!subscription.subscription || subscription?.subscription?.plan === 'NONE'){ 
+        toast({
+          title: "Subscription not found",
+          description: "Please subscribe to a plan to create a sub account",
+        })
+      }
       const response = await upsertSubAccount({
         id: details?.id ? details.id : v4(),
         address: values.address,
@@ -98,9 +102,9 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
         updatedAt: new Date(),
         companyEmail: values.companyEmail,
         agencyId: agencyDetails.id,
-        connectAccountId: '',
+        // connectAccountId: '',
         goal: 5000,
-        connectAccountSecret: null
+        // connectAccountSecret: null
       })
       if (!response) throw new Error('No response from server')
       await saveActivityLogsNotification({
@@ -135,7 +139,7 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
   }, [details])
 
   const isLoading = form.formState.isSubmitting
-  //CHALLENGE Create this form.
+
   return (
     <Card className="w-full">
       <CardHeader>

@@ -1,19 +1,19 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { cn } from "@/lib/utils"
 import { usePathname, useRouter } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { signOut, useSession } from "next-auth/react"
-import { User } from "next-auth"
+import type { User } from "next-auth"
 import XorvaneLogo from "@/components/global/XorvaneLogo"
 import NavButton from "./NavButton"
 
 export default function NavBar() {
   // const { user } = useUser();
-  const { data: session } = useSession();
-  const user = session?.user;
+  const { data: session } = useSession()
+  const user = session?.user
   const [currentUser, setUser] = useState<User | null>(null)
   const [activeSection, setActiveSection] = useState("")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -50,7 +50,7 @@ export default function NavBar() {
 
   const signout = async () => {
     await signOut()
-    router.push('/')
+    router.push("/")
   }
 
   useEffect(() => {
@@ -85,31 +85,29 @@ export default function NavBar() {
     <>
       <div
         className={cn(
-          "sticky top-0 z-50 w-full text-black dark:text-white border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 dark:border-border",
+          "sticky top-0 z-50 w-full text-foreground border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60",
         )}
       >
         <div className="flex justify-between px-4 lg:px-0 lg:justify-around items-center">
           <div className="flex justify-center items-center md:gap-2 lg:gap-8 py-2">
             <XorvaneLogo />
-            <ul className="hidden md:flex justify-center items-center font-medium text-[#09090bcc] dark:text-[#fafafacc]">
+            <ul className="hidden md:flex justify-center items-center font-medium text-muted-foreground">
               {["hero", "services", "pricing", "Contact Us"].map((section) => (
                 <li
                   key={section}
                   className={cn(
-                    "px-3 py-2 rounded-full dark:hover:bg-zinc-900 hover:bg-zinc-100 cursor-pointer",
-                    activeSection === section ? "bg-zinc-200 dark:bg-accent text-accent-foreground" : "",
+                    "px-3 py-2 rounded-full hover:bg-muted cursor-pointer transition duration-200",
+                    activeSection === section ? "bg-primary/10 text-primary" : "",
                   )}
                   onClick={() => {
                     if (section === "Contact Us") {
-                      router.push('/contact-us')
-                      return;
+                      router.push("/contact-us")
+                      return
                     }
                     scrollToSection(section)
                   }}
                 >
-                  {section === "hero"
-                    ? "Home"
-                    : section.charAt(0).toUpperCase() + section.slice(1)}
+                  {section === "hero" ? "Home" : section.charAt(0).toUpperCase() + section.slice(1)}
                 </li>
               ))}
             </ul>
@@ -123,17 +121,27 @@ export default function NavBar() {
                 </>
               ) : (
                 <>
-                  <Button size={"lg"} onClick={() => router.push('/agency')} variant="default" className="rounded-full">
+                  <Button
+                    size={"lg"}
+                    onClick={() => router.push("/agency")}
+                    variant="default"
+                    className="rounded-full transition duration-300 ease-in-out hover:scale-105"
+                  >
                     Dashboard
                   </Button>
-                  <Button size={"lg"} onClick={() => signout()} variant="outline" className="rounded-full">
+                  <Button
+                    size={"lg"}
+                    onClick={() => signout()}
+                    variant="outline"
+                    className="rounded-full transition duration-300 ease-in-out hover:scale-105"
+                  >
                     Sign Out
                   </Button>
                 </>
               )}
             </div>
             <button
-              className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              className="md:hidden p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle mobile menu"
             >
@@ -155,20 +163,21 @@ export default function NavBar() {
                 className={cn(
                   "block w-full text-left px-3 py-2 rounded-md text-base font-medium",
                   activeSection === id
-                    ? "bg-zinc-200 dark:bg-accent text-accent-foreground"
-                    : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800",
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
                 onClick={() => {
                   if (id === "Contact Us") {
-                    router.push('/contact-us')
-                    return;
-                  } scrollToSection(id)
+                    router.push("/contact-us")
+                    return
+                  }
+                  scrollToSection(id)
                 }}
               >
                 {id === "hero" ? "Home" : id.charAt(0).toUpperCase() + id.slice(1)}
               </button>
             ))}
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="pt-4 border-t border-border">
               <div className="flex items-center space-x-3">
                 {!currentUser ? (
                   <>
@@ -177,7 +186,12 @@ export default function NavBar() {
                   </>
                 ) : (
                   <div>
-                    <Button size={"lg"} onClick={() => signout()} variant="outline" className="rounded-full w-full">
+                    <Button
+                      size={"lg"}
+                      onClick={() => signout()}
+                      variant="outline"
+                      className="rounded-full w-full transition duration-300 ease-in-out hover:scale-105"
+                    >
                       Sign Out
                     </Button>
                   </div>
@@ -186,7 +200,7 @@ export default function NavBar() {
             </div>
           </div>
           <Button
-            className="absolute top-4 right-4 p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+            className="absolute top-4 right-4 p-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary"
             onClick={() => setIsMobileMenuOpen(false)}
             aria-label="Close menu"
           >

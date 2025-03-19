@@ -12,7 +12,7 @@ import VideoPlaceholder from './video-placeholder'
 import TwoColumnsPlaceholder from './two-columns-placeholder'
 import LinkPlaceholder from './link-placeholder'
 import ContactFormComponentPlaceholder from './contact-form-placeholder'
-import CheckoutPlaceholder from './checkout-placeholder'
+// import CheckoutPlaceholder from './checkout-placeholder'
 
 type Props = {}
 
@@ -41,24 +41,24 @@ const ComponentsTab = (props: Props) => {
       id: '2Col',
       group: 'layout',
     },
-    {
-      Component: <VideoPlaceholder />,
-      label: 'Video',
-      id: 'video',
-      group: 'elements',
-    },
+    // {
+    //   Component: <VideoPlaceholder />,
+    //   label: 'Video',
+    //   id: 'video',
+    //   group: 'elements',
+    // },
     {
       Component: <ContactFormComponentPlaceholder />,
       label: 'Contact',
       id: 'contactForm',
       group: 'elements',
     },
-    {
-      Component: <CheckoutPlaceholder />,
-      label: 'Checkout',
-      id: 'paymentForm',
-      group: 'elements',
-    },
+    // {
+    //   Component: <CheckoutPlaceholder />,
+    //   label: 'Checkout',
+    //   id: 'paymentForm',
+    //   group: 'elements',
+    // },
     {
       Component: <LinkPlaceholder />,
       label: 'Link',

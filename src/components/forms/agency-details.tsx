@@ -106,31 +106,31 @@ const AgencyDetails = ({ data }: Props) => {
     try {
       setLoading(true)
       let newUserData;
-      let custId, subId;
-      if (!data?.id) {
-        const bodyData = {
-          contact: values.companyPhone,
-          email: values.companyEmail,
-          name: values.name,
-          shipping: {
-            address: {
-              city: values.city,
-              country: values.country,
-              line1: values.address,
-              postal_code: values.zipCode,
-              state: values.zipCode,
-            },
-            name: values.name,
-          },
-          address: {
-            city: values.city,
-            country: values.country,
-            line1: values.address,
-            postal_code: values.zipCode,
-            state: values.zipCode,
-          },
-        };
-        let customerResponse;
+      // let custId, subId;
+      // if (!data?.id) {
+        // const bodyData = {
+        //   contact: values.companyPhone,
+        //   email: values.companyEmail,
+        //   name: values.name,
+        //   shipping: {
+        //     address: {
+        //       city: values.city,
+        //       country: values.country,
+        //       line1: values.address,
+        //       postal_code: values.zipCode,
+        //       state: values.zipCode,
+        //     },
+        //     name: values.name,
+        //   },
+        //   address: {
+        //     city: values.city,
+        //     country: values.country,
+        //     line1: values.address,
+        //     postal_code: values.zipCode,
+        //     state: values.zipCode,
+        //   },
+        // };
+        // let customerResponse;
         // try {
         //   customerResponse = await fetch("/api/razorpay/create-customer", {
         //     method: "POST",
@@ -147,21 +147,25 @@ const AgencyDetails = ({ data }: Props) => {
         // const customerData: { customerId: string } =
         //   await customerResponse.json();
         // custId = customerData.customerId;
-      }
+      // }
 
       newUserData = await initUser({ role: "AGENCY_OWNER" });
-      const updateSession = await update({
-        ...session,
-        user: {
-          ...session?.user,
-          role: "AGENCY_OWNER"
-        }
-      })
+      if(newUserData)
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            id: newUserData.id,
+            role: "AGENCY_OWNER",
+            image: newUserData.avatarUrl,
+            email: newUserData.email
+          }
+        })
 
       const response = await upsertAgency(
         {
           id: data?.id ? data.id : v4(),
-          customerId: custId || data?.customerId || "",
+          // customerId: custId || data?.customerId || "",
           address: values.address,
           agencyLogo: values.agencyLogo ?? null,
           city: values.city,
@@ -174,9 +178,8 @@ const AgencyDetails = ({ data }: Props) => {
           createdAt: new Date(),
           updatedAt: new Date(),
           companyEmail: values.companyEmail,
-          connectAccountId: "",
           goal: 5,
-          connectAccountSecret: null
+          // connectAccountSecret: null
         }
       );
       toast({
