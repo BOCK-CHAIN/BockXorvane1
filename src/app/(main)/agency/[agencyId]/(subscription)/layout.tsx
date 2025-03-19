@@ -23,7 +23,7 @@ export default async function layout({ children, params }: Props) {
     if (!agencyDetails) return;
     return (
         <>
-            {agencyDetails.Subscription?.plan !== "NONE" && <div className="absolute h-[125%] -top-10 -left-10 right-0 bottom-0 z-30 flex items-center justify-center backdrop-blur-md bg-background/50">
+            {agencyDetails.Subscription?.plan === "NONE" && <div className="absolute h-[125%] -top-10 -left-10 right-0 bottom-0 z-30 flex items-center justify-center backdrop-blur-md bg-background/50">
                 <Card>
                     <CardHeader>
                         <CardTitle>Please Subscribe</CardTitle>

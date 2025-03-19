@@ -6,11 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 
-const UserButton = () => {
+const UserButton = ({link}:{link: string | undefined}) => {
   const { data: session } = useSession();
   const router = useRouter();
 
-  if (!session?.user) return null; // Don't render if no user is logged in
+  if (!session?.user) return null; 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -25,7 +25,7 @@ const UserButton = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40">
-        <DropdownMenuItem onClick={() => router.push("/settings")}>
+        <DropdownMenuItem onClick={() => router.push(`/agency/${link}/settings`)}>
           View Profile
         </DropdownMenuItem>
         <DropdownMenuItem

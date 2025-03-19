@@ -56,6 +56,8 @@ const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Pro
     await deleteAllNotifications(agencyId)
   }
 
+  if(!agencyId && !subAccountId) return null
+
   return (
     <>
       <div
@@ -65,7 +67,7 @@ const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Pro
         )}
       >
         <div className="flex items-center gap-2 ml-auto">
-          <UserButton />
+          <UserButton link={agencyId? agencyId: subAccountId } />
 
           <Sheet>
             <SheetTrigger>
