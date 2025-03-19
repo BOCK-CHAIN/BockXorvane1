@@ -25,14 +25,16 @@ export default function SubscriptionInfo({ subscription }: { subscription: Subsc
     const updateTimeLeft = () => {
       const now = new Date()
       const startDate = subscription.currentPeriodStartDate ? new Date(subscription.currentPeriodStartDate) : now
-      const expiryDate = subscription.currentPeriodEndDate ? new Date(subscription.currentPeriodEndDate) : new Date()
+      const expiryDate = new Date(subscription.currentPeriodEndDate? subscription.currentPeriodEndDate : now)
       const timeDiff = expiryDate.getTime() - now.getTime()
       const totalDuration = expiryDate.getTime() - startDate.getTime()
       const timeElapsed = now.getTime() - startDate.getTime()
 
+      // Calculate progress (remaining percentage)
       const calculatedProgress = Math.max(0, Math.min(100, 100 - (timeElapsed / totalDuration) * 100))
       setProgress(calculatedProgress)
 
+      // Calculate time components
       const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24))
       const hours = Math.floor((timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
       const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60))
@@ -41,6 +43,7 @@ export default function SubscriptionInfo({ subscription }: { subscription: Subsc
       setHoursLeft(hours)
       setMinutesLeft(minutes)
 
+      // Set status
       if (timeDiff <= 0) {
         setStatus("expired")
         setTimeLeft("Expired")
@@ -60,7 +63,7 @@ export default function SubscriptionInfo({ subscription }: { subscription: Subsc
     }
 
     updateTimeLeft()
-    const timer = setInterval(updateTimeLeft, 60000*60) 
+    const timer = setInterval(updateTimeLeft, 60000) // Update every minute
 
     return () => clearInterval(timer)
   }, [subscription?.currentPeriodEndDate, subscription?.currentPeriodStartDate])
@@ -145,7 +148,7 @@ export default function SubscriptionInfo({ subscription }: { subscription: Subsc
           )}
         >
           <p className="text-sm font-medium text-muted-foreground">Total Time Remaining</p>
-          <p className="text-3xl font-bold">
+          <p className="text-3xl font-bold text-black dark:text-inherit">
             {daysLeft} {daysLeft === 1 ? "day" : "days"}
           </p>
         </div>
