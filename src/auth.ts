@@ -39,6 +39,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     strategy: "jwt"
   },
   trustHost: true,
+  
   adapter: PrismaAdapter(db),
   providers: [
     Credentials({
@@ -72,7 +73,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           return null;
         }
       },
-      
     }),
   ],
+  secret: process.env.NEXTAUTH_SECRET
 });
