@@ -278,7 +278,7 @@ export const upsertAgency = async (agency: Agency, price?: Plan) => {
           create: [
             {
               name: "Dashboard",
-              icon: "dashboard",
+              icon: "home",
               link: `/agency/${agency.id}`,
             },
             {
@@ -372,7 +372,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
         create: [
           {
             name: "Dashboard",
-            icon: "dashboard",
+            icon: "home",
             link: `/agency/${subAccount.id}`,
           },
           {

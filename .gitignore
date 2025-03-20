@@ -38,4 +38,4 @@ next-env.d.ts
 /prisma/generated
 
 gcs-key.json
-package-loc
+package-lock.json
