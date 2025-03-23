@@ -127,6 +127,14 @@ export const addUser = async (
 
 export async function signInUser(email: string, password: string) {
   try {
+    const result = await checkUser(email,password);
+    console.log("result",result)
+    if(!result.success){
+      return {
+        success: false,
+        message: result.message,
+      };
+    }
     await signIn("credentials", {
       redirect: false,
       email: email,
