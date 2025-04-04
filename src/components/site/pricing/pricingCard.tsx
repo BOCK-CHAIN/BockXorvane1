@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 interface PricingCardProps {
   title: string
   description: string
-  price: string // e.g. "$120"
+  price: string 
   interval: "Monthly" | "Yearly"
   isPopular?: boolean
   onSubscribe: () => void

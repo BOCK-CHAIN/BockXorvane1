@@ -7,5 +7,5 @@ export const paypalclient = new Client({
     oAuthClientSecret: process.env.PAYPAL_CLIENT_SECRET as string,
   },
   timeout: 0,
-  environment: Environment.Sandbox,
+  environment: process.env.NEXT_PUBLIC_PAYPAL_ENV as Environment,
 });
