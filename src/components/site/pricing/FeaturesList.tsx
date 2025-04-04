@@ -82,7 +82,7 @@ export default function FeaturesList({ features, className }: FeaturesListProps)
                     {feature.subFeatures.map((subFeature, subIndex) => (
                       <motion.li
                         key={subIndex}
-                        className="flex items-start p-3 rounded-lg hover:bg-muted transition-colors duration-200"
+                        className="flex items-center p-3 rounded-lg hover:bg-muted transition-colors duration-200 "
                         variants={subItemVariants}
                       >
                         <div className="flex-shrink-0 mt-0.5">

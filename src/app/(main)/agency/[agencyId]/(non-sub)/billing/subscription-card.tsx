@@ -14,12 +14,23 @@ import { captureOrder, createOrder } from "@/lib/paypal"
 import { saveOrder, savePaymentToDb } from "@/actions/billing"
 import { useRouter } from "next/navigation"
 
-export const plans = [
-  { name: "Monthly", price: 5.99, durationInMonths: 1 },
-  { name: "Yearly", price: 3.99, yearlyPrice: 47.88, durationInMonths: 12 },
+interface Plan {
+  name: string
+  price: number
+  durationInMonths: number
+  yearlyPrice?: number
+}
+
+export const plans: Plan[] = [
+  { name: "Monthly", price: Number(process.env.NEXT_PUBLIC_MONTHLY_PRICE) || 59.99, durationInMonths: 1 },
+  { name: "Yearly", price: Number(process.env.NEXT_PUBLIC_YEARLY_PRICE) / 12 || 49.99, yearlyPrice: Number(process.env.NEXT_PUBLIC_YEARLY_PRICE) || 599.88, durationInMonths: 12 },
 ]
 
-const benefits = ["WebBuild", "AutoWork", "WorkMan"]
+const benefits = ["Create and manage multiple funnels easily",
+  "Invite users and manage access permissions",
+  "Support for subaccounts to manage multiple projects",
+  "Customizable templates for quick deployment",
+]
 
 interface Props {
   agencyId: string;
@@ -140,7 +151,9 @@ export function SubscriptionCard({ plan, agencyId, subscription, agencyEmail, ag
         {selectedPlan.name === "Yearly" && (
           <div className={cn("text-sm", lightmode ? "text-gray-600" : "text-muted-foreground")}>
             ${selectedPlan.yearlyPrice!.toFixed(2)} per year
-            <span className="text-emerald-500 ml-2">save 33%</span>
+            <span className="text-emerald-500 ml-2">
+              save {(((plans[0].price * 12 - selectedPlan.yearlyPrice!) / (plans[0].price * 12)) * 100).toFixed(2)}%
+            </span>
           </div>
         )}
       </CardHeader>

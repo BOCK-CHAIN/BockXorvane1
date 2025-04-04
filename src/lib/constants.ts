@@ -16,7 +16,7 @@ import Notification from '@/components/icons/notification'
 import Payment from '@/components/icons/payment'
 import Person from '@/components/icons/person'
 import Pipelines from '@/components/icons/pipelines'
-import PluraCategory from '@/components/icons/plura-category'
+import Category from '@/components/icons/category'
 import Power from '@/components/icons/power'
 import Receipt from '@/components/icons/receipt'
 import Send from '@/components/icons/send'
@@ -27,39 +27,39 @@ import Tune from '@/components/icons/tune'
 import Video from '@/components/icons/video_recorder'
 import Wallet from '@/components/icons/wallet'
 import Warning from '@/components/icons/warning'
-export const pricingCards = [
-  {
-    title: 'Starter',
-    description: 'Perfect for trying out plura',
-    price: '',
-    duration: 'month',
-    highlight: 'Key features',
-    features: ['3 Sub accounts', '2 Team members', 'Unlimited pipelines'],
-    priceId: 'price_1QGKolJAJfZb9HEB98ih3OJ9',
-  },
-  {
-    title: 'Basic',
-    description: 'For serious agency owners',
-    price: '₹100',
-    duration: 'month',
-    highlight: 'Everything in Starter, plus',
-    features: ['Unlimited Sub accounts', 'Unlimited Team members'],
-    priceId: 'price_1QGKomJAJfZb9HEBlxHYkzlb',
-    plainId: 'plan_PGse2GnM3i4oIb',
-    itemId: 'item_PGlgCLm8oNwmHY'
-  },
-  {
-    title: 'Unlimited Saas',
-    description: 'The ultimate agency kit',
-    price: '₹499',
-    duration: 'month',
-    highlight: 'Key features',
-    features: ['Rebilling', '24/7 Support team'],
-    priceId: 'price_1QGKomJAJfZb9HEBcd44fI1h',
-    plainId: 'plan_PGtmVIiauaYoAH',
-    itemId: 'item_PGlgyLnvyZSOoC'
-  },
-]
+// export const pricingCards = [
+//   {
+//     title: 'Starter',
+//     description: 'Perfect for trying out',
+//     price: '',
+//     duration: 'month',
+//     highlight: 'Key features',
+//     features: ['3 Sub accounts', '2 Team members', 'Unlimited pipelines'],
+//     priceId: 'price_1QGKolJAJfZb9HEB98ih3OJ9',
+//   },
+//   {
+//     title: 'Basic',
+//     description: 'For serious agency owners',
+//     price: '₹100',
+//     duration: 'month',
+//     highlight: 'Everything in Starter, plus',
+//     features: ['Unlimited Sub accounts', 'Unlimited Team members'],
+//     priceId: 'price_1QGKomJAJfZb9HEBlxHYkzlb',
+//     plainId: 'plan_PGse2GnM3i4oIb',
+//     itemId: 'item_PGlgCLm8oNwmHY'
+//   },
+//   {
+//     title: 'Unlimited Saas',
+//     description: 'The ultimate agency kit',
+//     price: '₹499',
+//     duration: 'month',
+//     highlight: 'Key features',
+//     features: ['Rebilling', '24/7 Support team'],
+//     priceId: 'price_1QGKomJAJfZb9HEBcd44fI1h',
+//     plainId: 'plan_PGtmVIiauaYoAH',
+//     itemId: 'item_PGlgyLnvyZSOoC'
+//   },
+// ]
 
 export const addOnProducts = [
   { title: 'Priority Support', id: 'prod_PNjJAE2EpP16pn' },
@@ -204,7 +204,7 @@ export const icons = [
   {
     value: 'category',
     label: 'Category',
-    path: PluraCategory,
+    path: Category,
   },
   {
     value: 'clipboardIcon',

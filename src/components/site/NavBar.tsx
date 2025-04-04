@@ -92,7 +92,7 @@ export default function NavBar() {
           <div className="flex justify-center items-center md:gap-2 lg:gap-8 py-2">
             <XorvaneLogo />
             <ul className="hidden md:flex justify-center items-center font-medium text-muted-foreground">
-              {["hero", "services", "pricing", "Contact Us"].map((section) => (
+              {["hero", "pricing", "Contact Us"].map((section) => (
                 <li
                   key={section}
                   className={cn(
@@ -101,7 +101,7 @@ export default function NavBar() {
                   )}
                   onClick={() => {
                     if (section === "Contact Us") {
-                      router.push("/contact-us")
+                      scrollToSection("footer")
                       return
                     }
                     scrollToSection(section)
@@ -157,7 +157,7 @@ export default function NavBar() {
       {isMobileMenuOpen && (
         <div className="md:hidden fixed inset-0 z-50 min-h-fit bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="pt-16 pb-6 px-4 space-y-4">
-            {["hero", "services", "pricing", "Contact Us"].map((id) => (
+            {["hero", "pricing", "Contact Us"].map((id) => (
               <button
                 key={id}
                 className={cn(
@@ -168,7 +168,7 @@ export default function NavBar() {
                 )}
                 onClick={() => {
                   if (id === "Contact Us") {
-                    router.push("/contact-us")
+                    scrollToSection("footer")
                     return
                   }
                   scrollToSection(id)

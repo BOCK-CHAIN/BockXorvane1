@@ -48,7 +48,6 @@ import {
   upsertAgency,
 } from "@/lib/queries";
 import { Button } from "../ui/button";
-import Loading from "../global/loading";
 import { useSession } from "next-auth/react";
 import Loader from "../ui/loader";
 
@@ -79,88 +78,45 @@ const AgencyDetails = ({ data }: Props) => {
     mode: "onChange",
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      name: data?.name,
-      companyEmail: data?.companyEmail,
-      companyPhone: data?.companyPhone,
-      whiteLabel: data?.whiteLabel || false,
-      address: data?.address,
-      city: data?.city,
-      zipCode: data?.zipCode,
-      state: data?.state,
-      country: data?.country,
-      agencyLogo: data?.agencyLogo || undefined,
+      name: data?.name ?? "",
+      companyEmail: data?.companyEmail ?? "",
+      companyPhone: data?.companyPhone ?? "",
+      whiteLabel: data?.whiteLabel ?? false,
+      address: data?.address ?? "",
+      city: data?.city ?? "",
+      zipCode: data?.zipCode ?? "",
+      state: data?.state ?? "",
+      country: data?.country ?? "",
+      agencyLogo: data?.agencyLogo ?? "",
     },
   });
+
   const isLoading = form.formState.isSubmitting;
 
   useEffect(() => {
     if (data) {
       form.reset({
-        ...data,
-        agencyLogo: data.agencyLogo || undefined,
+        name: data?.name ?? "",
+        companyEmail: data?.companyEmail ?? "",
+        companyPhone: data?.companyPhone ?? "",
+        whiteLabel: data?.whiteLabel ?? false,
+        address: data?.address ?? "",
+        city: data?.city ?? "",
+        zipCode: data?.zipCode ?? "",
+        state: data?.state ?? "",
+        country: data?.country ?? "",
+        agencyLogo: data?.agencyLogo ?? "",
       });
     }
   }, [data]);
 
+
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
+      console.log(form.getValues())
       setLoading(true)
-      let newUserData;
-      // let custId, subId;
-      // if (!data?.id) {
-        // const bodyData = {
-        //   contact: values.companyPhone,
-        //   email: values.companyEmail,
-        //   name: values.name,
-        //   shipping: {
-        //     address: {
-        //       city: values.city,
-        //       country: values.country,
-        //       line1: values.address,
-        //       postal_code: values.zipCode,
-        //       state: values.zipCode,
-        //     },
-        //     name: values.name,
-        //   },
-        //   address: {
-        //     city: values.city,
-        //     country: values.country,
-        //     line1: values.address,
-        //     postal_code: values.zipCode,
-        //     state: values.zipCode,
-        //   },
-        // };
-        // let customerResponse;
-        // try {
-        //   customerResponse = await fetch("/api/razorpay/create-customer", {
-        //     method: "POST",
-        //     headers: {
-        //       "Content-Type": "application/json",
-        //     },
-        //     body: JSON.stringify(bodyData),
-        //   });
-        // } catch (error) {
-        //   console.log(error);
-        // }
-        // if (!customerResponse) return;
-
-        // const customerData: { customerId: string } =
-        //   await customerResponse.json();
-        // custId = customerData.customerId;
-      // }
-
-      newUserData = await initUser({ role: "AGENCY_OWNER" });
-      if(newUserData)
-        await update({
-          ...session,
-          user: {
-            ...session?.user,
-            id: newUserData.id,
-            role: "AGENCY_OWNER",
-            image: newUserData.avatarUrl,
-            email: newUserData.email
-          }
-        })
+      console.log(values, "values");
+      const newUserData = await initUser({ role: "AGENCY_OWNER" });
 
       const response = await upsertAgency(
         {
@@ -182,12 +138,24 @@ const AgencyDetails = ({ data }: Props) => {
           // connectAccountSecret: null
         }
       );
+      if (newUserData)
+        await update({
+          ...session,
+          user: {
+            ...session?.user,
+            id: newUserData.id,
+            role: "AGENCY_OWNER",
+            image: newUserData.avatarUrl,
+            email: newUserData.email
+          }
+        })
       toast({
-        title: "Created Agency",
+        title: "Created Agency.",
+        description: "Please wait while we redirect you."
       });
       if (data?.id) return router.refresh();
       if (response) {
-        return router.push(`/agency/${response.id}`);
+        return router.push(`/agency/${response.id}/billing`);
       }
       setLoading(false)
     } catch (error) {
@@ -232,12 +200,8 @@ const AgencyDetails = ({ data }: Props) => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form
-              onSubmit={form.handleSubmit(handleSubmit)}
-              className="space-y-4"
-            >
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="agencyLogo"
                 render={({ field }) => (
@@ -254,16 +218,15 @@ const AgencyDetails = ({ data }: Props) => {
                   </FormItem>
                 )}
               />
-              <div className="flex md:flex-row gap-4">
+              <div className="flex gap-4">
                 <FormField
-                  disabled={isLoading}
                   control={form.control}
                   name="name"
                   render={({ field }) => (
                     <FormItem className="flex-1">
                       <FormLabel>Agency Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Your agency name" {...field} />
+                        <Input placeholder="Agency name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -274,75 +237,60 @@ const AgencyDetails = ({ data }: Props) => {
                   name="companyEmail"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Agency Email</FormLabel>
+                      <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input readOnly placeholder="Email" {...field} />
+                        <Input placeholder="Email" readOnly {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="flex md:flex-row gap-4">
-                <FormField
-                  disabled={isLoading}
-                  control={form.control}
-                  name="companyPhone"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
-                      <FormLabel>Agency Phone Number</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Phone" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
               <FormField
-                disabled={isLoading}
                 control={form.control}
-                name="whiteLabel"
-                render={({ field }) => {
-                  return (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border gap-4 p-4">
-                      <div>
-                        <FormLabel>Whitelabel Agency</FormLabel>
-                        <FormDescription>
-                          Turning on whilelabel mode will show your agency logo
-                          to all sub accounts by default. You can overwrite this
-                          functionality through sub account settings.
-                        </FormDescription>
-                      </div>
-
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  );
-                }}
-              />
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="address"
+                name="companyPhone"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Address</FormLabel>
+                  <FormItem>
+                    <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input placeholder="123 st..." {...field} />
+                      <Input placeholder="Phone number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex md:flex-row gap-4">
+              <FormField
+                control={form.control}
+                name="whiteLabel"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border gap-4 p-4">
+                    <div>
+                      <FormLabel>Whitelabel Agency</FormLabel>
+                      <FormDescription>
+                        This will show your agency logo to all sub-accounts by default.
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input placeholder="123 St." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex gap-4">
                 <FormField
-                  disabled={isLoading}
                   control={form.control}
                   name="city"
                   render={({ field }) => (
@@ -356,7 +304,6 @@ const AgencyDetails = ({ data }: Props) => {
                   )}
                 />
                 <FormField
-                  disabled={isLoading}
                   control={form.control}
                   name="state"
                   render={({ field }) => (
@@ -370,14 +317,13 @@ const AgencyDetails = ({ data }: Props) => {
                   )}
                 />
                 <FormField
-                  disabled={isLoading}
                   control={form.control}
                   name="zipCode"
                   render={({ field }) => (
                     <FormItem className="flex-1">
-                      <FormLabel>Zipcpde</FormLabel>
+                      <FormLabel>Zip Code</FormLabel>
                       <FormControl>
-                        <Input placeholder="Zipcode" {...field} />
+                        <Input placeholder="Zip Code" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -385,11 +331,10 @@ const AgencyDetails = ({ data }: Props) => {
                 />
               </div>
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="country"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
+                  <FormItem>
                     <FormLabel>Country</FormLabel>
                     <FormControl>
                       <Input placeholder="Country" {...field} />
@@ -402,18 +347,16 @@ const AgencyDetails = ({ data }: Props) => {
                 <div className="flex flex-col gap-2">
                   <FormLabel>Create A Goal</FormLabel>
                   <FormDescription>
-                    ✨ Create a goal for your agency. As your business grows
-                    your goals grow too so dont forget to set the bar higher!
+                    ✨ Set a sub-account goal for your agency.
                   </FormDescription>
                   <NumberInput
-                    defaultValue={data?.goal}
+                    defaultValue={data.goal}
                     onValueChange={async (val) => {
-                      if (!data?.id) return;
+                      if (!data.id) return;
                       await updateAgencyDetails(data.id, { goal: val });
                       await saveActivityLogsNotification({
                         agencyId: data.id,
-                        description: `Updated the agency goal to | ${val} Sub Account`,
-                        subaccountId: undefined,
+                        description: `Updated agency goal to ${val} Sub Accounts`,
                       });
                       router.refresh();
                     }}

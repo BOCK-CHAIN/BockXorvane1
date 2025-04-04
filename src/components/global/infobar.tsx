@@ -139,7 +139,7 @@ const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Pro
               </div>
             </SheetContent>
           </Sheet>
-          <ModeToggle />
+          {/* <ModeToggle /> */}
         </div>
       </div>
     </>

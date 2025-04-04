@@ -14,20 +14,20 @@ type BillingInterval = "Monthly" | "Yearly"
 
 const prices = [
   {
-    id: "price_1",
+    id: "Monthly",
     title: "Pro Plan",
     description: "Perfect for individuals getting started with Web build",
     currency: "USD",
-    unit_amount: 1000,
+    unit_amount: Number(process.env.NEXT_PUBLIC_MONTHLY_PRICE),
     interval: "Monthly",
-    isPopular: true,
+    isPopular: false,
   },
   {
-    id: "price_2",
+    id: "Yearly",
     title: "Pro Plan",
     description: "Perfect for individuals getting started with SaaS solutions.",
     currency: "USD",
-    unit_amount: 9900,
+    unit_amount: Number(process.env.NEXT_PUBLIC_YEARLY_PRICE),
     interval: "Yearly",
     isPopular: true,
   },
@@ -80,9 +80,9 @@ export default function PricingPlans() {
   return (
     <section id="pricing" className="bg-background snap-center min-h-[90vh] mx-8 my-8 rounded-3xl">
       <AuthModal isOpen={isAuthModalOpen} onClose={() => setAuthModalOpen(false)} />
-      <div className="px-4 py-4 mx-auto sm:py-10 sm:px-6 lg:px-8">
+      <div className="px-4 py-4 mx-auto sm:py-10 sm:px-6 lg:px-8 ">
         <motion.div
-          className="sm:flex sm:flex-col sm:align-center gap-4 mb-12"
+          className="sm:flex sm:flex-col sm:align-center gap-4 sm:mb-12 mt-4 sm:mt-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -135,7 +135,7 @@ export default function PricingPlans() {
                   style: "currency",
                   currency: price.currency!,
                   minimumFractionDigits: 0,
-                }).format((price.unit_amount || 0) / 100)
+                }).format((price.unit_amount || 0) )
 
                 return (
                   <PricingCard
