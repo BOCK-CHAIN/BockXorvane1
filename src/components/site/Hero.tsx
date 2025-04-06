@@ -35,7 +35,7 @@ export default function Hero() {
             WebBuild is your all-in-one platform to create funnels, manage subaccounts, invite team members, and launch
             stunning websites—without the hassle. Take control and scale your digital presence effortlessly.
           </motion.p>
-          <motion.div
+          {/* <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6, duration: 0.8 }}
@@ -55,7 +55,7 @@ export default function Hero() {
             >
               Learn More
             </Button>
-          </motion.div>
+          </motion.div> */}
         </motion.div>
       </div>
       <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent pointer-events-none"></div>
