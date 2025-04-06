@@ -10,7 +10,7 @@ import Script from "next/script";
 const font = DM_Sans({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "WeBuild",
+  title: "WebBuild",
   description: "Build it",
 };
 
