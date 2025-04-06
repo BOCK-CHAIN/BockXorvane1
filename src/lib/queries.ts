@@ -25,37 +25,32 @@ import { auth } from "@/auth";
 import { getToken } from "next-auth/jwt";
 
 export const getAuthUserDetails = async () => {
-  try {
-    const session = await auth();
-    const user = session?.user;
-    if (!user || !user.email) {
-      return;
-    }
+  const session = await auth();
+  const user = session?.user;
+  if (!user || !user.email) {
+    return;
+  }
 
-    const userData = await db.user.findUnique({
-      where: {
-        email: user.email,
-      },
-      include: {
-        Agency: {
-          include: {
-            SidebarOption: true,
-            SubAccount: {
-              include: {
-                SidebarOption: true,
-              },
+  const userData = await db.user.findUnique({
+    where: {
+      email: user.email,
+    },
+    include: {
+      Agency: {
+        include: {
+          SidebarOption: true,
+          SubAccount: {
+            include: {
+              SidebarOption: true,
             },
           },
         },
-        Permissions: true,
       },
-    });
+      Permissions: true,
+    },
+  });
 
-    return userData;
-  } catch (error) {
-    console.log(error);
-    return null;
-  }
+  return userData;
 };
 
 export const saveActivityLogsNotification = async ({
@@ -67,103 +62,94 @@ export const saveActivityLogsNotification = async ({
   description: string;
   subaccountId?: string;
 }) => {
-  try {
-    const session = await auth();
-    const authUser = session?.user;
-    let userData;
-    if (!authUser) {
-      const response = await db.user.findFirst({
-        where: {
-          Agency: {
-            SubAccount: {
-              some: {
-                id: subaccountId,
-              },
-            },
-          },
-        },
-      });
-      if (response) {
-        userData = response;
-      }
-    } else {
-      userData = await db.user.findUnique({
-        where: {
-          email: authUser?.email,
-        },
-      });
-    }
-
-    if (!userData) {
-      return;
-    }
-
-    let foundAgencyId = agencyId;
-    if (!foundAgencyId) {
-      if (!subaccountId) {
-        throw new Error(
-          "You need to provide at least an agency Id or subaccount Id"
-        );
-      }
-      const response = await db.subAccount.findUnique({
-        where: { id: subaccountId },
-      });
-
-      if (response) foundAgencyId = response.agencyId;
-    }
-
-    if (subaccountId) {
-      await db.notification.create({
-        data: {
-          notification: `${userData.name} | ${description}`,
-          User: {
-            connect: {
-              id: userData.id,
-            },
-          },
-          Agency: {
-            connect: {
-              id: foundAgencyId,
-            },
-          },
+  const session = await auth();
+  const authUser = session?.user;
+  let userData;
+  if (!authUser) {
+    const response = await db.user.findFirst({
+      where: {
+        Agency: {
           SubAccount: {
-            connect: {
+            some: {
               id: subaccountId,
             },
           },
         },
-      });
-    } else {
-      await db.notification.create({
-        data: {
-          notification: `${userData.name} | ${description}`,
-          User: {
-            connect: {
-              id: userData.id,
-            },
-          },
-          Agency: {
-            connect: {
-              id: foundAgencyId,
-            },
+      },
+    });
+    if (response) {
+      userData = response;
+    }
+  } else {
+    userData = await db.user.findUnique({
+      where: {
+        email: authUser?.email,
+      },
+    });
+  }
+
+  if (!userData) {
+    return;
+  }
+
+  let foundAgencyId = agencyId;
+  if (!foundAgencyId) {
+    if (!subaccountId) {
+      throw new Error(
+        "You need to provide at least an agency Id or subaccount Id"
+      );
+    }
+    const response = await db.subAccount.findUnique({
+      where: { id: subaccountId },
+    });
+
+    if (response) foundAgencyId = response.agencyId;
+  }
+
+  if (subaccountId) {
+    await db.notification.create({
+      data: {
+        notification: `${userData.name} | ${description}`,
+        User: {
+          connect: {
+            id: userData.id,
           },
         },
-      });
-    }
-  } catch (error) {
-    console.log(error);
-    return null;
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+        SubAccount: {
+          connect: {
+            id: subaccountId,
+          },
+        },
+      },
+    });
+  } else {
+    await db.notification.create({
+      data: {
+        notification: `${userData.name} | ${description}`,
+        User: {
+          connect: {
+            id: userData.id,
+          },
+        },
+        Agency: {
+          connect: {
+            id: foundAgencyId,
+          },
+        },
+      },
+    });
   }
 };
 
 export const createTeamUser = async (agencyId: string, user: User) => {
-  try {
-    if (user.role === "AGENCY_OWNER") return null;
-    const response = await db.user.create({ data: { ...user } });
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  if (user.role === "AGENCY_OWNER") return null;
+  const response = await db.user.create({ data: { ...user } });
+  return response;
 };
 
 export const verifyAndAcceptInvitation = async () => {
@@ -220,8 +206,9 @@ export const verifyAndAcceptInvitation = async () => {
       });
       return agency ? agency.agencyId : null;
     }
-  } catch (error) {
-    console.log(error);
+  } catch (err) {
+    console.log(err);
+    return null;
   }
 };
 
@@ -229,78 +216,67 @@ export const updateAgencyDetails = async (
   agencyId: string,
   agencyDetails: Partial<Agency>
 ) => {
-  try {
-    const response = await db.agency.update({
-      where: { id: agencyId },
-      data: { ...agencyDetails },
-    });
+  const response = await db.agency.update({
+    where: { id: agencyId },
+    data: { ...agencyDetails },
+  });
 
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  return response;
 };
 
 export const deleteAgency = async (agencyId: string) => {
-  try {
-    const response = await db.agency.delete({
-      where: { id: agencyId },
-    });
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await db.agency.delete({
+    where: { id: agencyId },
+  });
+  return response;
 };
 
 export const initUser = async (newUser: Partial<User>) => {
-  try {
-    const session = await auth();
-    const user = session?.user;
-    if (!user) return;
-    const userData = await db.user.upsert({
-      where: {
-        email: user.email,
-      },
-      update: newUser,
-      create: {
-        id: user.id,
-        avatarUrl: user.image || "",
-        email: user.email,
-        name: `${user.name}`,
-        role: newUser.role || "SUBACCOUNT_USER",
-      },
-    });
+  const session = await auth();
+  const user = session?.user;
+  if (!user) return;
+  const userData = await db.user.upsert({
+    where: {
+      email: user.email,
+    },
+    update: newUser,
+    create: {
+      id: user.id,
+      avatarUrl: user.image || "",
+      email: user.email,
+      name: `${user.name}`,
+      role: newUser.role || "SUBACCOUNT_USER",
+    },
+  });
 
-    await db.authDetials.update({
-      where: {
-        email: user.email,
-      },
-      data: {
-        role: newUser.role || "SUBACCOUNT_USER",
-      },
-    });
+  await db.authDetials.update({
+    where: {
+      email: user.email,
+    },
+    data: {
+      role: newUser.role || "SUBACCOUNT_USER",
+    },
+  });
 
-    const token = await getToken({ req: { headers: { cookie: "" } } });
-    if (token) {
-      token.sub = newUser.id;
-      token.role = newUser.role || "SUBACCOUNT_USER";
-    }
-
-    // await clerkClient.users.updateUserMetadata(user.id, {
-    //   privateMetadata: {
-    //     role: newUser.role || "SUBACCOUNT_USER",
-    //   },
-    // });
-
-    return userData;
-  } catch (error) {
-    console.log(error);
+  const token = await getToken({ req: { headers: { cookie: "" } } });
+  if (token) {
+    token.sub = newUser.id;
+    token.role = newUser.role || "SUBACCOUNT_USER";
   }
+
+  // await clerkClient.users.updateUserMetadata(user.id, {
+  //   privateMetadata: {
+  //     role: newUser.role || "SUBACCOUNT_USER",
+  //   },
+  // });
+
+  return userData;
 };
 
 export const upsertAgency = async (agency: Agency, price?: Plan) => {
   if (!agency.companyEmail) return null;
   try {
+    console.log(agency);
     const agencyDetails = await db.agency.upsert({
       where: {
         id: agency.id,
@@ -375,10 +351,6 @@ export const getNotificationAndUser = async (agencyId: string) => {
 };
 
 export const upsertSubAccount = async (subAccount: SubAccount) => {
-  try {
-  } catch (error) {
-    console.log(error);
-  }
   if (!subAccount.companyEmail) return null;
   const agencyOwner = await db.user.findFirst({
     where: {
@@ -453,43 +425,35 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
 };
 
 export const getUserPermissions = async (userId: string) => {
-  try {
-    const response = await db.user.findUnique({
-      where: {
-        id: userId,
-      },
-      select: {
-        Permissions: {
-          include: {
-            SubAccount: true,
-          },
+  const response = await db.user.findUnique({
+    where: {
+      id: userId,
+    },
+    select: {
+      Permissions: {
+        include: {
+          SubAccount: true,
         },
       },
-    });
+    },
+  });
 
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  return response;
 };
 
 export const updateUser = async (user: Partial<User>) => {
-  try {
-    const response = await db.user.update({
-      where: { email: user.email },
-      data: { ...user },
-    });
+  const response = await db.user.update({
+    where: { email: user.email },
+    data: { ...user },
+  });
 
-    // await clerkClient.users.updateUserMetadata(response.id, {
-    //   privateMetadata: {
-    //     role: user.role || "SUBACCOUNT_USER",
-    //   },
-    // });
+  // await clerkClient.users.updateUserMetadata(response.id, {
+  //   privateMetadata: {
+  //     role: user.role || "SUBACCOUNT_USER",
+  //   },
+  // });
 
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  return response;
 };
 
 export const changeUserPermissions = async (
@@ -519,44 +483,32 @@ export const changeUserPermissions = async (
 };
 
 export const getSubaccountDetails = async (subaccountId: string) => {
-  try {
-    const response = await db.subAccount.findUnique({
-      where: {
-        id: subaccountId,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await db.subAccount.findUnique({
+    where: {
+      id: subaccountId,
+    },
+  });
+  return response;
 };
 
 export const deleteSubAccount = async (subaccountId: string) => {
-  try {
-    const response = await db.subAccount.delete({
-      where: {
-        id: subaccountId,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await db.subAccount.delete({
+    where: {
+      id: subaccountId,
+    },
+  });
+  return response;
 };
 
 export const deleteUser = async (userId: string) => {
-  try {
-    // await clerkClient.users.updateUserMetadata(userId, {
-    //   privateMetadata: {
-    //     role: undefined,
-    //   },
-    // });
-    const deletedUser = await db.user.delete({ where: { id: userId } });
+  // await clerkClient.users.updateUserMetadata(userId, {
+  //   privateMetadata: {
+  //     role: undefined,
+  //   },
+  // });
+  const deletedUser = await db.user.delete({ where: { id: userId } });
 
-    return deletedUser;
-  } catch (error) {
-    console.log(error);
-  }
+  return deletedUser;
 };
 
 export const getUser = async (id: string) => {
@@ -574,66 +526,54 @@ export const sendInvitation = async (
   email: string,
   agencyId: string
 ) => {
-  try {
-    const response = await db.invitation.create({
-      data: { email, agencyId, role },
-    });
+  const response = await db.invitation.create({
+    data: { email, agencyId, role },
+  });
 
-    // TODO: send the email to the subaccount user.
+  // TODO: send the email to the subaccount user.
 
-    // try {
-    // const invitation = await clerkClient.invitations.createInvitation({
-    //   emailAddress: email,
-    //   redirectUrl: process.env.NEXT_PUBLIC_URL,
-    //   publicMetadata: {
-    //     throughInvitation: true,
-    //     role,
-    //   },
-    // });
-    // } catch (error) {
-    //   console.log(error);
-    //   throw error;
-    // }
+  // try {
+  // const invitation = await clerkClient.invitations.createInvitation({
+  //   emailAddress: email,
+  //   redirectUrl: process.env.NEXT_PUBLIC_URL,
+  //   publicMetadata: {
+  //     throughInvitation: true,
+  //     role,
+  //   },
+  // });
+  // } catch (error) {
+  //   console.log(error);
+  //   throw error;
+  // }
 
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  return response;
 };
 
 export const getMedia = async (subaccountId: string) => {
-  try {
-    const mediafiles = await db.subAccount.findUnique({
-      where: {
-        id: subaccountId,
-      },
-      include: {
-        Media: true,
-      },
-    });
+  const mediafiles = await db.subAccount.findUnique({
+    where: {
+      id: subaccountId,
+    },
+    include: {
+      Media: true,
+    },
+  });
 
-    return mediafiles;
-  } catch (error) {
-    console.log(error);
-  }
+  return mediafiles;
 };
 
 export const createMedia = async (
   subaccountId: string,
   mediaFiles: CreateMediaType
 ) => {
-  try {
-    const response = await db.media.create({
-      data: {
-        link: mediaFiles.link,
-        name: mediaFiles.name,
-        subAccountId: subaccountId,
-      },
-    });
-    return response;
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await db.media.create({
+    data: {
+      link: mediaFiles.link,
+      name: mediaFiles.name,
+      subAccountId: subaccountId,
+    },
+  });
+  return response;
 };
 
 export const deleteMedia = async (mediaId: string) => {
