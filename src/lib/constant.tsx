@@ -82,19 +82,19 @@ export const FooterItems = [
     items: [
       {
         comp: "Privacy Policy",
-        href: "/privacy-policy",
+        href: `${process.env.NEXT_PUBLIC_HOME_URL??''}/privacy-policy`,
       },
       {
         comp: "Terms of Use",
-        href: "/terms-of-use",
+        href: `${process.env.NEXT_PUBLIC_HOME_URL?? ''}/terms-of-use`,
       },
       {
         comp: "Refund and Cancellation Policy",
-        href: "/refund-and-cancellation",
+        href: `${process.env.NEXT_PUBLIC_HOME_URL??''}/refund-and-cancellation`,
       },
       {
         comp: "Shipping And Delivery Policy",
-        href: "/shipping-and-delivery",
+        href: `${process.env.NEXT_PUBLIC_HOME_URL?? ''}/shipping-and-delivery`,
       }
     ],
   }
