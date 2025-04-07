@@ -276,7 +276,6 @@ export const initUser = async (newUser: Partial<User>) => {
 export const upsertAgency = async (agency: Agency, price?: Plan) => {
   if (!agency.companyEmail) return null;
   try {
-    console.log(agency);
     const agencyDetails = await db.agency.upsert({
       where: {
         id: agency.id,
@@ -478,7 +477,7 @@ export const changeUserPermissions = async (
     });
     return response;
   } catch (error) {
-    console.log("🔴Could not change persmission", error);
+    console.log("Could not change persmission", error);
   }
 };
 
@@ -671,7 +670,6 @@ export const updateLanesOrder = async (lanes: Lane[]) => {
     );
 
     await db.$transaction(updateTrans);
-    console.log("🟢 Done reordered 🟢");
   } catch (error) {
     console.log(error, "ERROR UPDATE LANES ORDER");
   }
@@ -692,9 +690,8 @@ export const updateTicketsOrder = async (tickets: Ticket[]) => {
     );
 
     await db.$transaction(updateTrans);
-    console.log("🟢 Done reordered 🟢");
   } catch (error) {
-    console.log(error, "🔴 ERROR UPDATE TICKET ORDER");
+    console.log(error, "ERROR UPDATE TICKET ORDER");
   }
 };
 

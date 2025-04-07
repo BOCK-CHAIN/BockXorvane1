@@ -65,7 +65,6 @@ export default function PricingPlans() {
 
 
   const handleSubscribe = () => {
-    console.log(`Subscribing to ${billingInterval} plan`)
     if (!currentUser) {
       setAuthModalOpen(true) // Show sign-up modal if no user
       return

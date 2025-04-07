@@ -33,7 +33,6 @@ function AuthForm({ isSignUp }: { isSignUp: boolean }) {
 
   async function onSubmit(data: z.infer<typeof signUpSchema>) {
     try {
-        console.log("hello")
       setLoading(true)
       const { email, password, name } = await signUpSchema.parseAsync(data)
       if (isSignUp) {

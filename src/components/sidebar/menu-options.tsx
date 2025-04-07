@@ -65,8 +65,6 @@ const MenuOptions = ({
     setIsMounted(true)
   }, [])
 
-  console.log(sidebarLogo)
-
   if (!isMounted) return
 
   return (

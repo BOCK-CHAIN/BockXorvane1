@@ -67,7 +67,6 @@ export function SubscriptionCard({ plan, agencyId, subscription, agencyEmail, ag
       const { error } = await savePaymentToDb(agencyId, paymentId)
 
       if (error) {
-        console.log(error)
         toast.error("An error occurred while saving the payment.")
         return { error }
       }
@@ -88,11 +87,9 @@ export function SubscriptionCard({ plan, agencyId, subscription, agencyEmail, ag
     plan: "MONTHLY" | "YEARLY"
   }) => {
     try {
-      console.log("hello")
       const { error } = await saveOrder(agencyId, subscriptionData)
 
       if (error) {
-        console.log(error)
         toast.error("An error occurred while saving the subscription.")
         return { error }
       }
@@ -217,7 +214,6 @@ export function SubscriptionCard({ plan, agencyId, subscription, agencyEmail, ag
                   }
                   orderData.expiryDate.setDate(orderData.expiryDate.getDate() + 1);
                   orderData.expiryDate.setHours(0, 0, 0, 0);
-                  console.log(orderData)
                   const resp = await saveOrderToDatabase(orderData)
 
                   if (resp?.error) {
@@ -247,7 +243,6 @@ export function SubscriptionCard({ plan, agencyId, subscription, agencyEmail, ag
                 }
               }}
               onError={(err) => {
-                console.log(err)
                 toast.error("An error occurred with the payment process.")
               }}
             />

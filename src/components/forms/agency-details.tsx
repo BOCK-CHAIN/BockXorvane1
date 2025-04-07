@@ -113,9 +113,6 @@ const AgencyDetails = ({ data }: Props) => {
 
   const handleSubmit = async (values: z.infer<typeof FormSchema>) => {
     try {
-      console.log(form.getValues())
-      setLoading(true)
-      console.log(values, "values");
       const newUserData = await initUser({ role: "AGENCY_OWNER" });
 
       const response = await upsertAgency(

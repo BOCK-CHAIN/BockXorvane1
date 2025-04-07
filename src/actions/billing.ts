@@ -16,8 +16,6 @@ export const savePaymentToDb = async (agencyId: string, paymentId: string) => {
       },
     });
 
-    console.log(response);
-
     return { response };
   } catch (error) {
     console.error(error);
@@ -65,7 +63,6 @@ export const saveOrder = async (
       },
     });
 
-    console.log(response);
     return { response };
   } catch (error) {
     console.error(error);
