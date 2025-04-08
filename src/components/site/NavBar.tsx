@@ -185,12 +185,12 @@ export default function NavBar() {
                     <NavButton variant={"default"} text={"Sign-Up"} href={"/auth/sign-up"} />
                   </>
                 ) : (
-                  <div>
+                  <div className="flex  gap-4">
                     <Button
                       size={"lg"}
-                      onClick={() => router.push("/agency")}
+                      onClick={() => router.push('/dashboard')}
                       variant="secondary"
-                      className="rounded-full w-full transition duration-300 ease-in-out hover:scale-105"
+                      className="rounded-full w-full transition duration-300 ease-in-out hover:scale-105 hover:bg-orange-500/10"
                     >
                       Dashboard
                     </Button>
@@ -198,7 +198,7 @@ export default function NavBar() {
                       size={"lg"}
                       onClick={() => signout()}
                       variant="outline"
-                      className="rounded-full w-full transition duration-300 ease-in-out hover:scale-105"
+                      className="rounded-full w-full transition duration-300 ease-in-out hover:scale-105 hover:bg-white hover:text-black"
                     >
                       Sign Out
                     </Button>
