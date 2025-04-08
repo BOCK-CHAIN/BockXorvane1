@@ -188,6 +188,14 @@ export default function NavBar() {
                   <div>
                     <Button
                       size={"lg"}
+                      onClick={() => router.push("/agency")}
+                      variant="secondary"
+                      className="rounded-full w-full transition duration-300 ease-in-out hover:scale-105"
+                    >
+                      Dashboard
+                    </Button>
+                    <Button
+                      size={"lg"}
                       onClick={() => signout()}
                       variant="outline"
                       className="rounded-full w-full transition duration-300 ease-in-out hover:scale-105"
