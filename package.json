@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "npx prisma generate"
+    "postinstall": "npx prisma generate",
+    "postdeploy": "curl -s https://your-domain.com/api/schedular?secret=WEBBUILD@BOCKBharath"
   },
   "resolutions": {
     "@auth/core": "latest"
@@ -80,11 +81,13 @@
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/node-cron": "^3.0.11",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.0.4",
+    "node-cron": "^3.0.3",
     "nodemon": "^3.1.9",
     "postcss": "^8",
     "prisma": "^6.5.0",
