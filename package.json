@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "postinstall": "npx prisma generate",
-    "postdeploy": "curl -s https://your-domain.com/api/schedular?secret=WEBBUILD@BOCKBharath"
+    "postinstall": "npx prisma generate"
   },
   "resolutions": {
     "@auth/core": "latest"
