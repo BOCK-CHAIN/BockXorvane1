@@ -57,7 +57,7 @@ export default auth((req) => {
     }
     return NextResponse.next();
   } catch (err) {
-    console.log("Error in middleware", err);
+    console.log("Error ");
   }
 });
 

@@ -38,6 +38,7 @@ export const getAuthUserDetails = async () => {
     include: {
       Agency: {
         include: {
+          Subscription: true,
           SidebarOption: true,
           SubAccount: {
             include: {
@@ -49,7 +50,6 @@ export const getAuthUserDetails = async () => {
       Permissions: true,
     },
   });
-
   return userData;
 };
 
@@ -359,7 +359,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
       role: "AGENCY_OWNER",
     },
   });
-  if (!agencyOwner) return console.log("🔴Erorr could not create subaccount");
+  if (!agencyOwner) return console.log("Erorr could not create subaccount");
   const permissionId = v4();
   const response = await db.subAccount.upsert({
     where: {
@@ -387,7 +387,7 @@ export const upsertSubAccount = async (subAccount: SubAccount) => {
           {
             name: "Dashboard",
             icon: "home",
-            link: `/agency/${subAccount.id}`,
+            link: `/subaccount/${subAccount.id}`,
           },
           {
             name: "Pipelines",

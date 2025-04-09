@@ -144,7 +144,7 @@ const MenuOptions = ({
                             >
                               <div className="relative w-16">
                                 <Image
-                                  src={user?.Agency?.agencyLogo ? user.Agency.agencyLogo: '/profile.jpg'}
+                                  src={user?.Agency?.agencyLogo ? user.Agency.agencyLogo : '/profile.jpg'}
                                   alt="Agency Logo"
                                   fill
                                   className="rounded-md object-contain"
@@ -194,7 +194,7 @@ const MenuOptions = ({
                             >
                               <div className="relative w-16">
                                 <Image
-                                  src={subaccount.subAccountLogo? subaccount.subAccountLogo: '/profile.jpg'}
+                                  src={subaccount.subAccountLogo ? subaccount.subAccountLogo : '/profile.jpg'}
                                   alt="subaccount Logo"
                                   fill
                                   className="rounded-md object-contain"
@@ -236,7 +236,7 @@ const MenuOptions = ({
                   </CommandGroup>
                 </CommandList>
                 {(user.role === 'AGENCY_OWNER' ||
-                  user.role === 'AGENCY_ADMIN') && (
+                  user.role === 'AGENCY_ADMIN') && (user.Agency.Subscription.plan != "NONE") && (
                     <SheetClose>
                       <Button
                         className="w-full flex gap-2"
@@ -277,7 +277,7 @@ const MenuOptions = ({
                       (icon) => icon.value === sidebarOptions.icon
                     );
                     if (result) {
-                      val = <result.path   />;
+                      val = <result.path />;
                     }
 
                     return (

@@ -106,7 +106,6 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
     },
     include: {
       FunnelPages: true,
-      
     },
   })
 
@@ -121,7 +120,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
   return (
     <BlurPage>
       <div className="relative h-full">
-          {subaccountDetails.Agency.Subscription?.plan === "NONE" && <div className="absolute h-[160%] -top-10 -left-10 right-0 bottom-0 z-30 flex items-center justify-center backdrop-blur-md bg-background/50">
+          {/* {subaccountDetails.Agency.Subscription?.plan === "NONE" && <div className="absolute h-[160%] -top-10 -left-10 right-0 bottom-0 z-30 flex items-center justify-center backdrop-blur-md bg-background/50">
             <Card>
               <CardHeader>
                 <CardTitle>Connect Your Stripe</CardTitle>
@@ -137,7 +136,7 @@ const SubaccountPageId = async ({ params, searchParams }: Props) => {
                 </Link>
               </CardHeader>
             </Card>
-          </div>}
+          </div>} */}
         <div className="flex flex-col gap-4 pb-6">
           <div className="flex gap-4 flex-col xl:!flex-row">
             <PipelineValue subaccountId={params.subaccountId} />

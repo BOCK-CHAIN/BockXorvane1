@@ -6,19 +6,24 @@ import React from 'react'
 
 type Props = {
     children: React.ReactNode
-    params: { agencyId: string };
+    params: { subaccountId: string };
 }
 
 export default async function layout({ children, params }: Props) {
-    const agencyDetails = await db.agency.findUnique({
+    const subAccountDetail = await db.subAccount.findUnique({
         where: {
-            id: params.agencyId,
+            id: params.subaccountId,
         },
         include: {
-            Subscription: true
+            Agency:{
+                select:{
+                    id: true,
+                    Subscription: true
+                }
+            }
         }
     });
-
+    const agencyDetails = subAccountDetail?.Agency
     if (!agencyDetails) return;
     return (
         <>
@@ -27,15 +32,15 @@ export default async function layout({ children, params }: Props) {
                     <CardHeader>
                         <CardTitle>Please Subscribe</CardTitle>
                         <CardDescription>
-                            You need to subscription to a plan to access the features of this agency.
+                            You need to subscription to a plan from your agency to access the features of this Subaccount.
                         </CardDescription>
-                        <Link
+                        {/* <Link
                             href={`/agency/${agencyDetails.id}/billing`}
                             className="p-2 w-fit bg-secondary text-white rounded-md flex items-center gap-2"
                         >
                             <ClipboardIcon />
                             Billing
-                        </Link>
+                        </Link> */}
                     </CardHeader>
                 </Card>
             </div>}

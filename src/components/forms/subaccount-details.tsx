@@ -1,11 +1,24 @@
 'use client'
 
-import { zodResolver } from '@hookform/resolvers/zod'
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { v4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 
+import { Agency, SubAccount } from '@prisma/client'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useToast } from '@/components/ui/use-toast'
+import { useModal } from '@/providers/modal-provider'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -14,38 +27,23 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { useRouter } from 'next/navigation'
-
-import { Input } from '@/components/ui/input'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from '@/components/ui/card'
 
 import FileUpload from '../global/file-upload'
-import { Agency, SubAccount } from '@prisma/client'
-import { useToast } from '../ui/use-toast'
-import { saveActivityLogsNotification, upsertSubAccount } from '@/lib/queries'
-import { useEffect } from 'react'
-import Loading from '../global/loading'
-import { useModal } from '@/providers/modal-provider'
 import Loader from '../ui/loader'
-import { db } from '@/lib/db'
+
+import { saveActivityLogsNotification, upsertSubAccount } from '@/lib/queries'
 import { getSubscription } from '@/actions/billing'
 
 const formSchema = z.object({
-  name: z.string(),
-  companyEmail: z.string(),
-  companyPhone: z.string().min(1),
-  address: z.string(),
-  city: z.string(),
+  name: z.string().min(1, 'Account name is required'),
+  companyEmail: z.string().email('Invalid email address'),
+  companyPhone: z.string().min(1, 'Phone number is required'),
+  address: z.string().min(1, 'Address is required'),
+  city: z.string().min(1, 'City is required'),
+  state: z.string().min(1, 'State is required'),
+  zipCode: z.string().min(1, 'Zipcode is required'),
+  country: z.string().min(1, 'Country is required'),
   subAccountLogo: z.string().optional(),
-  zipCode: z.string(),
-  state: z.string(),
-  country: z.string(),
 })
 
 interface SubAccountDetailsProps {
@@ -64,96 +62,104 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
   const { toast } = useToast()
   const { setClose } = useModal()
   const router = useRouter()
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: details?.name,
-      companyEmail: details?.companyEmail,
-      companyPhone: details?.companyPhone,
-      address: details?.address,
-      city: details?.city,
-      zipCode: details?.zipCode,
-      state: details?.state,
-      country: details?.country,
-      subAccountLogo: details?.subAccountLogo,
+      name: '',
+      companyEmail: '',
+      companyPhone: '',
+      address: '',
+      city: '',
+      state: '',
+      zipCode: '',
+      country: '',
+      subAccountLogo: '',
     },
   })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  useEffect(() => {
+    if (details) {
+      form.reset({
+        name: details.name ?? '',
+        companyEmail: details.companyEmail ?? '',
+        companyPhone: details.companyPhone ?? '',
+        address: details.address ?? '',
+        city: details.city ?? '',
+        state: details.state ?? '',
+        zipCode: details.zipCode ?? '',
+        country: details.country ?? '',
+        subAccountLogo: details.subAccountLogo ?? '',
+      })
+    }
+  }, [details, form])
+
+  const isLoading = form.formState.isSubmitting
+
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const subscription =await getSubscription(agencyDetails.id)
-      if(!subscription.subscription || subscription?.subscription?.plan === 'NONE'){ 
+      const subscription = await getSubscription(agencyDetails.id)
+
+      if (!subscription?.subscription || subscription.subscription.plan === 'NONE') {
         toast({
-          title: "Subscription not found",
-          description: "Please subscribe to a plan to create a sub account",
+          title: 'Subscription not found',
+          description: 'Please subscribe to a plan to create a subaccount.',
         })
+        return
       }
+
       const response = await upsertSubAccount({
-        id: details?.id ? details.id : v4(),
-        address: values.address,
-        subAccountLogo: values.subAccountLogo || '',
-        city: values.city,
-        companyPhone: values.companyPhone,
-        country: values.country,
+        id: details?.id ?? uuidv4(),
         name: values.name,
+        companyEmail: values.companyEmail,
+        companyPhone: values.companyPhone,
+        address: values.address,
+        city: values.city,
         state: values.state,
         zipCode: values.zipCode,
+        country: values.country,
+        subAccountLogo: values.subAccountLogo ?? '',
+        agencyId: agencyDetails.id,
         createdAt: new Date(),
         updatedAt: new Date(),
-        companyEmail: values.companyEmail,
-        agencyId: agencyDetails.id,
-        // connectAccountId: '',
         goal: 5000,
-        // connectAccountSecret: null
       })
+
       if (!response) throw new Error('No response from server')
+
       await saveActivityLogsNotification({
         agencyId: response.agencyId,
-        description: `${userName} | updated sub account | ${response.name}`,
+        description: `${userName} | updated subaccount | ${response.name}`,
         subaccountId: response.id,
       })
 
       toast({
-        title: 'Subaccount details saved',
-        description: 'Successfully saved your subaccount details.',
+        title: 'Success',
+        description: 'Subaccount details saved successfully.',
       })
 
       setClose()
       router.refresh()
     } catch (error) {
+      console.error(error)
       toast({
         variant: 'destructive',
-        title: 'Oppse!',
-        description: 'Could not save sub account details.',
+        title: 'Oops!',
+        description: 'Failed to save subaccount details. Please try again.',
       })
     }
   }
 
-  useEffect(() => {
-    if (details) {
-      form.reset({
-        ...details,
-        subAccountLogo: details?.subAccountLogo || undefined,
-      })
-    }
-  }, [details])
-
-  const isLoading = form.formState.isSubmitting
-
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Sub Account Information</CardTitle>
-        <CardDescription>Please enter business details</CardDescription>
+        <CardTitle>Subaccount Information</CardTitle>
+        <CardDescription>Enter business details below.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="space-y-4"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
-              disabled={isLoading}
               control={form.control}
               name="subAccountLogo"
               render={({ field }) => (
@@ -170,57 +176,29 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
                 </FormItem>
               )}
             />
-            <div className="flex md:flex-row gap-4">
+
+            <div className="flex flex-col md:flex-row gap-4">
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>Account Name</FormLabel>
                     <FormControl>
-                      <Input
-                        required
-                        placeholder="Your agency name"
-                        {...field}
-                      />
+                      <Input placeholder="Your account name" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="companyEmail"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Acount Email</FormLabel>
+                    <FormLabel>Account Email</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="Email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <div className="flex md:flex-row gap-4">
-              <FormField
-                disabled={isLoading}
-                control={form.control}
-                name="companyPhone"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Acount Phone Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Phone"
-                        required
-                        {...field}
-                      />
+                      <Input placeholder="Email" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -229,103 +207,91 @@ const SubAccountDetails: React.FC<SubAccountDetailsProps> = ({
             </div>
 
             <FormField
-              disabled={isLoading}
               control={form.control}
-              name="address"
+              name="companyPhone"
               render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormLabel>Address</FormLabel>
+                <FormItem>
+                  <FormLabel>Phone Number</FormLabel>
                   <FormControl>
-                    <Input
-                      required
-                      placeholder="123 st..."
-                      {...field}
-                    />
+                    <Input placeholder="Phone" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <div className="flex md:flex-row gap-4">
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="123 Main Street" {...field} disabled={isLoading} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex flex-col md:flex-row gap-4">
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="city"
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>City</FormLabel>
                     <FormControl>
-                      <Input
-                        required
-                        placeholder="City"
-                        {...field}
-                      />
+                      <Input placeholder="City" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="state"
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormLabel>State</FormLabel>
                     <FormControl>
-                      <Input
-                        required
-                        placeholder="State"
-                        {...field}
-                      />
+                      <Input placeholder="State" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               <FormField
-                disabled={isLoading}
                 control={form.control}
                 name="zipCode"
                 render={({ field }) => (
                   <FormItem className="flex-1">
-                    <FormLabel>Zipcpde</FormLabel>
+                    <FormLabel>Zipcode</FormLabel>
                     <FormControl>
-                      <Input
-                        required
-                        placeholder="Zipcode"
-                        {...field}
-                      />
+                      <Input placeholder="Zipcode" {...field} disabled={isLoading} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+
             <FormField
-              disabled={isLoading}
               control={form.control}
               name="country"
               render={({ field }) => (
-                <FormItem className="flex-1">
+                <FormItem>
                   <FormLabel>Country</FormLabel>
                   <FormControl>
-                    <Input
-                      required
-                      placeholder="Country"
-                      {...field}
-                    />
+                    <Input placeholder="Country" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className='min-w-28'
-            >
-              {isLoading ? <Loader state /> : 'Save Account Information'}
+
+            <Button type="submit" disabled={isLoading} className="min-w-28">
+              {isLoading ? <Loader state /> : 'Save Subaccount'}
             </Button>
           </form>
         </Form>
