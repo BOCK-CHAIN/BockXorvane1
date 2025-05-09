@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { NextApiRequest, NextApiResponse } from "next";
 import { NextResponse } from "next/server";
 import { Storage } from "@google-cloud/storage";
 

@@ -20,6 +20,7 @@ import UserButton from './user-button'
 import { Separator } from '../ui/separator'
 import { Button } from '../ui/button'
 import { deleteAllNotifications, deleteNotification } from '@/actions/user'
+import { usePathname } from 'next/navigation'
 
 type Props = {
   notifications: NotificationWithUser | []
@@ -30,6 +31,12 @@ type Props = {
 }
 
 const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Props) => {
+  const pathname = usePathname()
+
+  // Hide InfoBar on specific editor page pattern
+  const editorRegex = /^\/subaccount\/[^/]+\/funnels\/[^/]+\/editor\/[^/]+$/
+  if (editorRegex.test(pathname)) return null
+
   const [allNotifications, setAllNotifications] = useState(notifications)
   const [showAll, setShowAll] = useState(true)
 
@@ -39,13 +46,13 @@ const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Pro
     } else {
       if (notifications?.length !== 0) {
         setAllNotifications(
-          notifications?.filter((item) => item.subAccountId === subAccountId) ??
-          []
+          notifications?.filter((item) => item.subAccountId === subAccountId) ?? []
         )
       }
     }
     setShowAll((prev) => !prev)
   }
+
   const handleDeleteNotification = async (id: string) => {
     setAllNotifications((prev) => prev?.filter((n) => n.id !== id))
     await deleteNotification(id)
@@ -56,7 +63,7 @@ const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Pro
     await deleteAllNotifications(agencyId)
   }
 
-  if(!agencyId && !subAccountId) return null
+  if (!agencyId && !subAccountId) return null
 
   return (
     <>
@@ -67,7 +74,7 @@ const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Pro
         )}
       >
         <div className="flex items-center gap-2 ml-auto">
-          <UserButton link={agencyId? agencyId: subAccountId } />
+          <UserButton link={agencyId ? agencyId : subAccountId} />
 
           <Sheet>
             <SheetTrigger>
@@ -102,7 +109,10 @@ const InfoBar = ({ notifications, subAccountId, className, role, agencyId }: Pro
                     <div key={notification.id} className="flex flex-col gap-y-2">
                       <div className="flex gap-2">
                         <Avatar>
-                          <AvatarImage src={notification.User.avatarUrl} alt="Profile Picture" />
+                          <AvatarImage
+                            src={notification.User.avatarUrl}
+                            alt="Profile Picture"
+                          />
                           <AvatarFallback className="bg-primary">
                             {notification.User.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>

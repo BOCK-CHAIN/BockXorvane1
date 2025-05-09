@@ -1,4 +1,5 @@
 'use client'
+
 import React, { useEffect, useState } from 'react'
 import { z } from 'zod'
 import {
@@ -19,7 +20,6 @@ import {
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Input } from '../ui/input'
-
 import { Button } from '../ui/button'
 import Loading from '../global/loading'
 import { useToast } from '../ui/use-toast'
@@ -49,11 +49,11 @@ const CreateFunnelPage: React.FC<CreateFunnelPageProps> = ({
   order,
   subaccountId,
 }) => {
-  const {setClose,isOpen}= useModal()
-  const [isLoading,setIsLoading] = useState(false)
+  const { setClose } = useModal()
+  const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
   const router = useRouter()
-  //ch
+
   const form = useForm<z.infer<typeof FunnelPageSchema>>({
     resolver: zodResolver(FunnelPageSchema),
     mode: 'onChange',
@@ -65,16 +65,21 @@ const CreateFunnelPage: React.FC<CreateFunnelPageProps> = ({
 
   useEffect(() => {
     if (defaultData) {
-      form.reset({ name: defaultData.name, pathName: defaultData.pathName })
+      form.reset({
+        name: defaultData.name || '',
+        pathName: defaultData.pathName || '',
+      })
     }
-  }, [defaultData])
+  }, [defaultData, form])
 
   const onSubmit = async (values: z.infer<typeof FunnelPageSchema>) => {
-    if (order !== 0 && !values.pathName)
+    if (order !== 0 && !values.pathName) {
       return form.setError('pathName', {
         message:
-          "Pages other than the first page in the funnel require a path name example 'secondstep'.",
+          "Pages other than the first page in the funnel require a path name (e.g., 'secondstep').",
       })
+    }
+
     try {
       const response = await upsertFunnelPage(
         subaccountId,
@@ -90,20 +95,22 @@ const CreateFunnelPage: React.FC<CreateFunnelPageProps> = ({
       await saveActivityLogsNotification({
         agencyId: undefined,
         description: `Updated a funnel page | ${response?.name}`,
-        subaccountId: subaccountId,
+        subaccountId,
       })
+
       toast({
         title: 'Success',
         description: 'Saved Funnel Page Details',
       })
+
       router.replace(`/subaccount/${subaccountId}/funnels/${funnelId}`)
-      setClose();
-      
+      setClose()
     } catch (error) {
+      console.error(error)
       toast({
         variant: 'destructive',
-        title: 'Oppse!',
-        description: 'Could Save Funnel Page Details',
+        title: 'Oops!',
+        description: 'Could not save Funnel Page details.',
       })
     }
   }
@@ -113,117 +120,97 @@ const CreateFunnelPage: React.FC<CreateFunnelPageProps> = ({
       <CardHeader>
         <CardTitle>Funnel Page</CardTitle>
         <CardDescription>
-          Funnel pages are flow in the order they are created by default. You
-          can move them around to change their order.
+          Funnel pages follow the order they are created in. You can reorder them as needed.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-6"
-          >
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
             <FormField
-              disabled={form.formState.isSubmitting}
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Name"
-                      {...field}
-                    />
+                    <Input placeholder="Page name" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <FormField
-              disabled={form.formState.isSubmitting || order === 0}
               control={form.control}
               name="pathName"
               render={({ field }) => (
                 <FormItem className="flex-1">
                   <FormLabel>Path Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="Path for the page"
-                      {...field}
-                      value={field.value?.toLowerCase()}
-                    />
+                    <Input placeholder="Path for the page" {...field} value={field.value?.toLowerCase()} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
             <div className="flex items-center gap-2">
-              <Button
-                className="w-22 self-end"
-                disabled={form.formState.isSubmitting}
-                type="submit"
-              >
+              <Button type="submit" disabled={form.formState.isSubmitting} className="w-22 self-end">
                 {form.formState.isSubmitting ? <Loading /> : 'Save Page'}
               </Button>
 
               {defaultData?.id && (
-                <Button
-                  variant={'outline'}
-                  className="w-22 self-end border-destructive text-destructive hover:bg-destructive"
-                  disabled={form.formState.isSubmitting}
-                  type="button"
-                  onClick={async () => {
-                    setIsLoading(true)
-                    const response = await deleteFunnelPage(defaultData.id)
-                    await saveActivityLogsNotification({
-                      agencyId: undefined,
-                      description: `Deleted a funnel page | ${response?.name}`,
-                      subaccountId: subaccountId,
-                    })
-                    router.refresh()
-                    setIsLoading(false)
-                  }}
-                >
-                  { isLoading ? <Loading /> : <Trash />}
-                </Button>
-              )}
-              {defaultData?.id && (
-                <Button
-                  variant={'outline'}
-                  size={'icon'}
-                  disabled={form.formState.isSubmitting}
-                  type="button"
-                  onClick={async () => {
-                    setIsLoading(true)
-                    const response = await getFunnels(subaccountId)
-                    const lastFunnelPage = response.find(
-                      (funnel) => funnel.id === funnelId
-                    )?.FunnelPages.length
+                <>
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      setIsLoading(true)
+                      const response = await deleteFunnelPage(defaultData.id)
+                      await saveActivityLogsNotification({
+                        agencyId: undefined,
+                        description: `Deleted a funnel page | ${response?.name}`,
+                        subaccountId,
+                      })
+                      router.refresh()
+                      setIsLoading(false)
+                    }}
+                    variant="outline"
+                    className="w-22 self-end border-destructive text-destructive hover:bg-destructive"
+                  >
+                    {isLoading ? <Loading /> : <Trash />}
+                  </Button>
 
-                    await upsertFunnelPage(
-                      subaccountId,
-                      {
-                        ...defaultData,
-                        id: v4(),
-                        order: lastFunnelPage ? lastFunnelPage : 0,
-                        visits: 0,
-                        name: `${defaultData.name} Copy`,
-                        pathName: `${defaultData.pathName}copy`,
-                        content: defaultData.content,
-                      },
-                      funnelId
-                    )
-                    toast({
-                      title: 'Success',
-                      description: 'Saves Funnel Page Details',
-                    })
-                    router.refresh()
-                    setIsLoading(false)
-                  }}
-                >
-                  { isLoading ? <Loading /> : <CopyPlusIcon />}
-                </Button>
+                  <Button
+                    type="button"
+                    onClick={async () => {
+                      setIsLoading(true)
+                      const response = await getFunnels(subaccountId)
+                      const lastOrder = response.find(funnel => funnel.id === funnelId)?.FunnelPages.length || 0
+
+                      await upsertFunnelPage(
+                        subaccountId,
+                        {
+                          ...defaultData,
+                          id: v4(),
+                          order: lastOrder,
+                          visits: 0,
+                          name: `${defaultData.name} Copy`,
+                          pathName: `${defaultData.pathName}copy`,
+                          content: defaultData.content,
+                        },
+                        funnelId
+                      )
+                      toast({
+                        title: 'Success',
+                        description: 'Copied Funnel Page successfully.',
+                      })
+                      router.refresh()
+                      setIsLoading(false)
+                    }}
+                    variant="outline"
+                    size="icon"
+                  >
+                    {isLoading ? <Loading /> : <CopyPlusIcon />}
+                  </Button>
+                </>
               )}
             </div>
           </form>
